@@ -1,0 +1,47 @@
+name: ci
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_ADMIN_URL: postgresql://postgres:postgres@localhost:5432/stockpilot_test
+      DATABASE_URL: postgresql://stockpilot_app:stockpilot_dev_pw@localhost:5432/stockpilot_test
+      APP_DB_PASSWORD: stockpilot_dev_pw
+      SP_TEST_DB: stockpilot_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.13.6"
+          enable-cache: true
+      - run: uv sync --frozen
+      - name: ruff
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+      - name: mypy --strict
+        run: uv run mypy
+      - name: pytest (+coverage)
+        run: uv run pytest --cov=app --cov-report=term-missing:skip-covered --cov-report=xml --cov-fail-under=80
+      - name: OpenAPI contract is up to date
+        run: |
+          uv run python -m scripts.dump_openapi
+          git diff --exit-code docs/contracts/openapi.json
+      - name: pip-audit
+        run: uv run pip-audit

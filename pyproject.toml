@@ -1,0 +1,83 @@
+[project]
+name = "stockpilot-api"
+version = "0.1.0"
+description = "StockPilot AI backend (FastAPI + Postgres)"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "asyncpg",
+    "pydantic>=2",
+    "pydantic-settings",
+    "pyjwt[crypto]",
+    "httpx",
+    "numpy",
+    "apscheduler",
+    "pandas-market-calendars",
+    "orjson",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+    "hypothesis",
+    "respx",
+    "ruff",
+    "mypy",
+    "pip-audit",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+extend-exclude = [".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC", "S", "SIM", "RUF", "C4", "PT"]
+ignore = ["S101", "RUF012", "PT018", "PT012", "ASYNC109", "E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S105", "S106", "S608", "S311"]
+"scripts/**" = ["S608"]
+"app/core/migrate.py" = ["S608"]
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Header"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+files = ["app", "scripts", "tests"]
+exclude = ["^\\.venv/"]
+
+[[tool.mypy.overrides]]
+module = ["asyncpg.*", "pandas_market_calendars.*", "apscheduler.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "db: needs the Postgres test database",
+]
+filterwarnings = [
+    "error::pytest.PytestUnraisableExceptionWarning",
+]
+
+[tool.coverage.run]
+source = ["app"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
