@@ -98,6 +98,7 @@ class OrderDraft(ResponseModel):
     limit_price: Price | None
     est_price: Price | None
     est_cost: Money | None
+    est_cash_after: Money | None = None
     will: Literal["fill", "queue", "work", "reject"] | None
 
 

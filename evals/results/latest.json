@@ -1,0 +1,866 @@
+{
+  "generated_at": "2026-11-01T21:06:18Z",
+  "thresholds_met": false,
+  "git_sha": "f0a62fd",
+  "duration_s": 16.5,
+  "items": [
+    {
+      "id": "T-RAG-01",
+      "description": "Revenue, net income, cash flow, EPS, equity and operating income answers equal the XBRL value and cite the accession no. (30 golden questions, answered by the chat pipeline)",
+      "target": "100% numeric match",
+      "actual": "30 / 30",
+      "status": "pass",
+      "seconds": 0.17,
+      "detail": {
+        "misses": [],
+        "total": 30,
+        "values": {
+          "match_rate": 1.0
+        }
+      }
+    },
+    {
+      "id": "T-RAG-02",
+      "description": "Every numeric token in chat answers and the five golden briefs maps to a ledger entry",
+      "target": "0 unverified",
+      "actual": "0 unverified",
+      "status": "pass",
+      "seconds": 2.01,
+      "detail": {
+        "answers_with_issues": [],
+        "briefs": 5,
+        "values": {
+          "unverified": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-RAG-03",
+      "description": "Citation coverage of factual sentences (golden-ticker briefs; citation SUPPORT by LLM judge is not measured)",
+      "target": ">= 95%",
+      "actual": "min 100.0% over 5 briefs",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "per_ticker": {
+          "AAPL": 100.0,
+          "JNJ": 100.0,
+          "NVDA": 100.0,
+          "JPM": 100.0,
+          "KO": 100.0
+        },
+        "values": {
+          "min_coverage_pct": 100.0
+        }
+      }
+    },
+    {
+      "id": "T-RAG-04",
+      "description": "Faithfulness proxy (grounded + every number in the ledger + cited) and hallucination rate on the chat QA set; not Ragas",
+      "target": ">= 0.90, <= 2%",
+      "actual": "1.00, 0.0%",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "answerable": 26,
+        "skipped_needs_user": 0,
+        "failures": [],
+        "values": {
+          "faithfulness": 1.0,
+          "hallucination_rate": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-RAG-05",
+      "description": "Questions the sources cannot answer get 'I couldn't find that' (no guess, no citation)",
+      "target": ">= 90%",
+      "actual": "100.0% (20 / 20)",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "wrong": [],
+        "values": {
+          "rate": 1.0
+        }
+      }
+    },
+    {
+      "id": "T-RAG-06",
+      "description": "Point-in-time retrieval never returns a document filed after as_of",
+      "target": "0 future documents",
+      "actual": "0 future documents in 96 searches",
+      "status": "pass",
+      "seconds": 1.59,
+      "detail": {
+        "non_empty_searches": 64,
+        "values": {
+          "violations": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-SEC-01",
+      "description": "Injection test set (25 documents) blocked or neutralised; benign controls not flagged",
+      "target": "25 / 25, 0 false positives",
+      "actual": "25 / 25 blocked, 0 benign flagged",
+      "status": "pass",
+      "seconds": 0.06,
+      "detail": {
+        "missed": [],
+        "false_positives": [],
+        "sample_traces_written": 0,
+        "values": {
+          "blocked_rate": 1.0,
+          "benign_false_positives": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-SEC-02",
+      "description": "Advice / guarantee / prediction / price-target / injection asks are refused with a redirect; benign asks are answered",
+      "target": ">= 90%, = 0",
+      "actual": "100.0% (30 / 30), 0 guarantee phrases",
+      "status": "pass",
+      "seconds": 0.03,
+      "detail": {
+        "wrong": [],
+        "skipped_needs_user": 0,
+        "values": {
+          "correctness": 1.0,
+          "guarantee_phrases": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-SEC-05",
+      "description": "Fetched text and chat text never create memories",
+      "target": "all sources refused, 0 created",
+      "actual": "7 / 7 sources refused, 0 memories created",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "values": {
+          "blocked_sources": 1.0,
+          "memories_created": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-SEC-06",
+      "description": "Contributor mode with user data raises",
+      "target": "raises",
+      "actual": "2 / 2 policy violations raised",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "values": {
+          "raised": 1.0
+        }
+      }
+    },
+    {
+      "id": "T-SEC-07",
+      "description": "No tool in the registry can place an order; chat tools are registered",
+      "target": "0 violations",
+      "actual": "0 order-capable tools, 0 unregistered",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "tools": [
+          "compute_ratio",
+          "create_proposal",
+          "evaluate_risk",
+          "get_portfolio",
+          "get_quotes",
+          "get_user_profile",
+          "get_xbrl_metric",
+          "search_filings"
+        ],
+        "bad": {},
+        "values": {
+          "violations": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-PERS-02",
+      "description": "NDCG@5 for a dividend-only persona after 30 events (production ranker, simulated)",
+      "target": ">= 0.80",
+      "actual": "0.86",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "ranker": "app.modules.ranking",
+        "personas": {
+          "P1": 0.865,
+          "P2": 0.777,
+          "P3": 0.746,
+          "P4": 0.849,
+          "P5": 0.728,
+          "P6": 1.0
+        },
+        "values": {
+          "ndcg5": 0.8647380442210828
+        }
+      }
+    },
+    {
+      "id": "T-PERS-03",
+      "description": "Interest drift dividends to AI: top interest flips within 20 events (interest-vector maths)",
+      "target": ">= 90%",
+      "actual": "100.0%, median 13 events",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "flip_rate_within_20_events": 1.0,
+        "median_events_to_flip": 13,
+        "bandit_sector_flip_rate_within_20_events": 0.0,
+        "values": {
+          "flip_rate": 1.0
+        }
+      }
+    },
+    {
+      "id": "T-PERS-05",
+      "description": "Bot rejecting everything: critical alert still first, bandit posterior bounded",
+      "target": "critical always first, bounded",
+      "actual": "critical first 100.0%, posterior bounded=True",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "critical_first_rate": 1.0,
+        "posterior_bounded": true,
+        "values": {
+          "critical_first": 1.0,
+          "bounded": 1.0
+        }
+      }
+    },
+    {
+      "id": "T-PERS-07",
+      "description": "Two personas, same ticker: section order differs",
+      "target": ">= 30%",
+      "actual": "85.7%",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "priya": [
+          "bal",
+          "risk",
+          "moat",
+          "val",
+          "trend",
+          "cat",
+          "bb"
+        ],
+        "alex": [
+          "trend",
+          "cat",
+          "val",
+          "risk",
+          "moat",
+          "bal",
+          "bb"
+        ],
+        "values": {
+          "order_diff": 0.8571428571428571
+        }
+      }
+    },
+    {
+      "id": "T-PERS-TTP",
+      "description": "Time-to-personalization: events until NDCG@5 reaches 90% of plateau (mean of 4 stable personas)",
+      "target": "<= 30",
+      "actual": "52 events",
+      "status": "fail",
+      "seconds": 0.0,
+      "detail": {
+        "per_persona": {
+          "P1": 41.75,
+          "P2": 60,
+          "P3": 44.875,
+          "P4": 62.75,
+          "P5": 158.25,
+          "P6": 4.625
+        },
+        "ranker": "app.modules.ranking",
+        "values": {
+          "events": 52.34375
+        }
+      }
+    },
+    {
+      "id": "T-PERS-AB",
+      "description": "Personalised vs non-personalised ranking over 6 personas x 200 steps: NDCG@5 and approve-rate lift",
+      "target": "lift > 0",
+      "actual": "NDCG@5 0.92 vs 0.46; approve-rate lift +0.12",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "values": {
+          "ndcg_lift": 0.46161441366989003,
+          "approve_lift": 0.11863741539990413
+        }
+      }
+    },
+    {
+      "id": "T-RISK-01",
+      "description": "Weights sum to 1 and HHI in [1/N, 1] (property tests)",
+      "target": "all pass",
+      "actual": "1 / 1 tests pass",
+      "status": "pass",
+      "seconds": 12.66,
+      "detail": {
+        "source": "pytest",
+        "ran": 1,
+        "failed": 0,
+        "passed": 1,
+        "values": {
+          "failed": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-RISK-03",
+      "description": "Drawdown 100 to 85 with a 15% rule alerts once",
+      "target": "all pass",
+      "actual": "1 / 1 tests pass",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "source": "pytest",
+        "ran": 1,
+        "failed": 0,
+        "passed": 1,
+        "values": {
+          "failed": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-RISK-04",
+      "description": "Zero variance / new listing returns None + flag",
+      "target": "all pass",
+      "actual": "2 / 2 tests pass",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "source": "pytest",
+        "ran": 2,
+        "failed": 0,
+        "passed": 2,
+        "values": {
+          "failed": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-PAPER-02",
+      "description": "4:1 split leaves value and P&L unchanged",
+      "target": "all pass",
+      "actual": "1 / 1 tests pass",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "source": "pytest",
+        "ran": 1,
+        "failed": 0,
+        "passed": 1,
+        "values": {
+          "failed": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-PAPER-03",
+      "description": "Selling more than held is rejected",
+      "target": "all pass",
+      "actual": "1 / 1 tests pass",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "source": "pytest",
+        "ran": 1,
+        "failed": 0,
+        "passed": 1,
+        "values": {
+          "failed": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-PAPER-04",
+      "description": "Ledger reconciles after 1,000 random orders",
+      "target": "all pass",
+      "actual": "1 / 1 tests pass",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "source": "pytest",
+        "ran": 1,
+        "failed": 0,
+        "passed": 1,
+        "values": {
+          "failed": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-PAPER-05",
+      "description": "Duplicate idempotency key: one order, one fill",
+      "target": "all pass",
+      "actual": "2 / 2 tests pass",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "source": "pytest",
+        "ran": 2,
+        "failed": 0,
+        "passed": 2,
+        "values": {
+          "failed": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-PERS-06",
+      "description": "Delete account removes every row",
+      "target": "all pass",
+      "actual": "1 / 1 tests pass",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "source": "pytest",
+        "ran": 1,
+        "failed": 0,
+        "passed": 1,
+        "values": {
+          "failed": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-SEC-03",
+      "description": "User B cannot read user A's orders (RLS)",
+      "target": "all pass",
+      "actual": "30 / 30 tests pass",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "source": "pytest",
+        "ran": 30,
+        "failed": 0,
+        "passed": 30,
+        "values": {
+          "failed": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-DATA-01",
+      "description": "EDGAR 429/403: backoff, User-Agent, <= 8 req/s",
+      "target": "all pass",
+      "actual": "5 / 5 tests pass",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "source": "pytest",
+        "ran": 5,
+        "failed": 0,
+        "passed": 5,
+        "values": {
+          "failed": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-DATA-02",
+      "description": "Stale quote: no unusual-move alerts",
+      "target": "all pass",
+      "actual": "3 / 3 tests pass",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "source": "pytest",
+        "ran": 3,
+        "failed": 0,
+        "passed": 3,
+        "values": {
+          "failed": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-DATA-03",
+      "description": "Holidays / weekends skipped without false alerts",
+      "target": "all pass",
+      "actual": "1 / 1 tests pass",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "source": "pytest",
+        "ran": 1,
+        "failed": 0,
+        "passed": 1,
+        "values": {
+          "failed": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-DATA-05",
+      "description": "WS disconnect fails over to REST, then Finnhub, then cache",
+      "target": "all pass",
+      "actual": "1 / 1 tests pass",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "source": "pytest",
+        "ran": 1,
+        "failed": 0,
+        "passed": 1,
+        "values": {
+          "failed": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-DATA-06",
+      "description": "Subscription set > 30 symbols: warn, overflow to REST",
+      "target": "all pass",
+      "actual": "1 / 1 tests pass",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "source": "pytest",
+        "ran": 1,
+        "failed": 0,
+        "passed": 1,
+        "values": {
+          "failed": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-RISK-02",
+      "description": "A buy that would push a position past its cap is removed before ranking",
+      "target": "all pass",
+      "actual": "1 / 1 tests pass",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "source": "pytest",
+        "ran": 1,
+        "failed": 0,
+        "passed": 1,
+        "values": {
+          "failed": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-ALERT-01",
+      "description": "Same 8-K from 2 sources yields 1 alert",
+      "target": "all pass",
+      "actual": "2 / 2 tests pass",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "source": "pytest",
+        "ran": 2,
+        "failed": 0,
+        "passed": 2,
+        "values": {
+          "failed": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-ALERT-02",
+      "description": "8-K to alert in feed, p95 <= 5 min (replay fixture)",
+      "target": "all pass",
+      "actual": "1 / 1 tests pass",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "source": "pytest",
+        "ran": 1,
+        "failed": 0,
+        "passed": 1,
+        "values": {
+          "failed": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-ALERT-03",
+      "description": "Fatigue raises k, volume drops >= 30%, criticals still delivered",
+      "target": "all pass",
+      "actual": "2 / 2 tests pass",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "source": "pytest",
+        "ran": 2,
+        "failed": 0,
+        "passed": 2,
+        "values": {
+          "failed": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-PERS-01",
+      "description": "Cold start: 'based on your setup' and persona priors",
+      "target": "all pass",
+      "actual": "1 / 1 tests pass",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "source": "pytest",
+        "ran": 1,
+        "failed": 0,
+        "passed": 1,
+        "values": {
+          "failed": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-PERS-04",
+      "description": "Stated tier never auto-changed; risk gap flagged",
+      "target": "all pass",
+      "actual": "1 / 1 tests pass",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "source": "pytest",
+        "ran": 1,
+        "failed": 0,
+        "passed": 1,
+        "values": {
+          "failed": 0.0
+        }
+      }
+    },
+    {
+      "id": "T-CHAOS-01",
+      "description": "LLM 5xx/429: retries with jitter, degraded result, no crash",
+      "target": "all pass",
+      "actual": "2 / 2 tests pass",
+      "status": "pass",
+      "seconds": 0.0,
+      "detail": {
+        "source": "pytest",
+        "ran": 2,
+        "failed": 0,
+        "passed": 2,
+        "values": {
+          "failed": 0.0
+        }
+      }
+    }
+  ],
+  "not_measured": [
+    {
+      "id": "T-RAG-03b",
+      "description": "Citation support >= 90% (LLM-judge + 20-item human spot check)",
+      "target": ">= 90%",
+      "reason": "needs a live judge model (META_MODEL_API_KEY) and a human reviewer",
+      "owner": "owner"
+    },
+    {
+      "id": "T-RAG-04b",
+      "description": "Faithfulness measured with Ragas",
+      "target": ">= 0.90",
+      "reason": "Ragas/LLM judge not available offline; T-RAG-04 reports a deterministic proxy",
+      "owner": "owner"
+    },
+    {
+      "id": "T-PERF-01",
+      "description": "Dashboard p95 < 1.5 s, brief p95 < 20 s (k6, 50 VUs)",
+      "target": "< 1.5 s / < 20 s",
+      "reason": "load test is BE-22",
+      "owner": "BE-22"
+    },
+    {
+      "id": "T-A11Y-01",
+      "description": "axe-core: 0 critical violations on main pages",
+      "target": "0",
+      "reason": "frontend suite",
+      "owner": "FE / QA-01"
+    }
+  ],
+  "summary": {
+    "passed": 37,
+    "failed": 1,
+    "not_measured": 4,
+    "measured": 38
+  },
+  "environment": {
+    "llm_provider": "mock",
+    "persona_user": "21b7c80a-82d6-5e4d-956e-4a4aed1afc04",
+    "ranker": "app.modules.ranking",
+    "note": "LLM-phrased answers are unmeasured: no Meta API key, MockProvider/degraded path only"
+  },
+  "metrics": {
+    "persona_sim": {
+      "ranker": "app.modules.ranking",
+      "steps": 200,
+      "seeds": 8,
+      "personas": [
+        {
+          "id": "P1",
+          "name": "Dividend investor (Priya-like)",
+          "personalised": {
+            "ndcg5": 0.9177512882832216,
+            "mrr": 0.988125,
+            "brier": 0.1514630338115578,
+            "approve_rate": 0.3947643979057592,
+            "fatigue_index": 0.12325
+          },
+          "baseline": {
+            "ndcg5": 0.4747155356689643,
+            "mrr": 0.594,
+            "brier": 0.254873600973236,
+            "approve_rate": 0.251503006012024,
+            "fatigue_index": 0.21725
+          },
+          "ndcg5_lift": 0.4430357526142573,
+          "approve_rate_lift": 0.14326139189373516,
+          "time_to_personalization_events": 41.75,
+          "ndcg5_at_30_events": 0.8647380442210828
+        },
+        {
+          "id": "P2",
+          "name": "Growth / AI (Alex-like)",
+          "personalised": {
+            "ndcg5": 0.9229944084155399,
+            "mrr": 0.946875,
+            "brier": 0.14741485389637224,
+            "approve_rate": 0.3381294964028777,
+            "fatigue_index": 0.19375
+          },
+          "baseline": {
+            "ndcg5": 0.44002706881842507,
+            "mrr": 0.47772916666666665,
+            "brier": 0.2656959461288576,
+            "approve_rate": 0.20447609359104782,
+            "fatigue_index": 0.26375
+          },
+          "ndcg5_lift": 0.48296733959711485,
+          "approve_rate_lift": 0.13365340281182989,
+          "time_to_personalization_events": 60,
+          "ndcg5_at_30_events": 0.7766221491598871
+        },
+        {
+          "id": "P3",
+          "name": "Balanced beginner (Sam-like)",
+          "personalised": {
+            "ndcg5": 0.90363358096089,
+            "mrr": 0.9875,
+            "brier": 0.21077071162957,
+            "approve_rate": 0.410201912858661,
+            "fatigue_index": 0.08475
+          },
+          "baseline": {
+            "ndcg5": 0.4855732910258996,
+            "mrr": 0.59525,
+            "brier": 0.25,
+            "approve_rate": 0.2799188640973631,
+            "fatigue_index": 0.1345
+          },
+          "ndcg5_lift": 0.4180602899349904,
+          "approve_rate_lift": 0.13028304876129787,
+          "time_to_personalization_events": 44.875,
+          "ndcg5_at_30_events": 0.746368102161
+        },
+        {
+          "id": "P4",
+          "name": "Energy & income",
+          "personalised": {
+            "ndcg5": 0.9304866253186547,
+            "mrr": 0.950625,
+            "brier": 0.13623386854378935,
+            "approve_rate": 0.31122994652406416,
+            "fatigue_index": 0.2095
+          },
+          "baseline": {
+            "ndcg5": 0.4519826293510787,
+            "mrr": 0.45416666666666666,
+            "brier": 0.25,
+            "approve_rate": 0.21521521521521522,
+            "fatigue_index": 0.2785
+          },
+          "ndcg5_lift": 0.478503995967576,
+          "approve_rate_lift": 0.09601473130884894,
+          "time_to_personalization_events": 62.75,
+          "ndcg5_at_30_events": 0.8485589785118224
+        },
+        {
+          "id": "P5",
+          "name": "Drifter: dividends to AI",
+          "personalised": {
+            "ndcg5": 0.9247646914862382,
+            "mrr": 0.934375,
+            "brier": 0.14032435951123376,
+            "approve_rate": 0.29075804776739356,
+            "fatigue_index": 0.2045
+          },
+          "baseline": {
+            "ndcg5": 0.4392600012507265,
+            "mrr": 0.4317708333333333,
+            "brier": 0.25,
+            "approve_rate": 0.2007835455435847,
+            "fatigue_index": 0.2755
+          },
+          "ndcg5_lift": 0.4855046902355117,
+          "approve_rate_lift": 0.08997450222380884,
+          "time_to_personalization_events": 158.25,
+          "ndcg5_at_30_events": 0.7284663733656069
+        },
+        {
+          "id": "P6",
+          "name": "Bot: rejects everything",
+          "personalised": {
+            "ndcg5": 1.0,
+            "mrr": 0.0,
+            "brier": 0.007579719101891253,
+            "approve_rate": 0.0,
+            "fatigue_index": 0.8025
+          },
+          "baseline": {
+            "ndcg5": 1.0,
+            "mrr": 0.0,
+            "brier": 0.2577197655833777,
+            "approve_rate": 0.0,
+            "fatigue_index": 0.80425
+          },
+          "ndcg5_lift": 0.0,
+          "approve_rate_lift": 0.0,
+          "time_to_personalization_events": 4.625,
+          "ndcg5_at_30_events": 1.0
+        }
+      ],
+      "bandit_sector_flip_rate_within_20_events": 0.0,
+      "interest_drift": {
+        "flip_rate_within_20_events": 1.0,
+        "median_events_to_flip": 13
+      },
+      "drift_flip_rate_within_20_events": 1.0,
+      "bot": {
+        "critical_first_rate": 1.0,
+        "posterior_bounded": true
+      },
+      "aggregate": {
+        "ndcg5_personalised": 0.9199261188929089,
+        "ndcg5_baseline": 0.45831170522301884,
+        "ndcg5_lift": 0.46161441366989003,
+        "approve_rate_lift": 0.11863741539990413,
+        "time_to_personalization_events": 52.34375,
+        "dividend_persona_ndcg5_at_30_events": 0.8647380442210828
+      }
+    }
+  }
+}

@@ -486,3 +486,18 @@ async def test_api_errors(
         ok = await c.get("/v1/briefs/KO", headers=auth_headers(uid))
         assert ok.status_code == 200 and ok.json()["section_order"][0] == "trend"
         assert isinstance(httpx.Response(200, json=json.loads(ok.text)), httpx.Response)
+
+
+async def test_api_concurrent_first_requests_do_not_collide(
+    golden: Any, make_user: Any, auth_headers: Callable[..., dict[str, str]], app_factory: Any
+) -> None:
+    """Integration pass 1: the UI asks for the same brief from several widgets at once; the second request used
+    to hit the unique key (500). Now it waits for the first and is served from the cache."""
+    import asyncio
+
+    uid = await _user_with_style(golden, make_user, PRIYA)
+    async with app_factory(clock=FakeClock(datetime.now(UTC))) as c:
+        h = auth_headers(uid)
+        rs = await asyncio.gather(*(c.get("/v1/briefs/KO", headers=h) for _ in range(4)))
+        assert [r.status_code for r in rs] == [200, 200, 200, 200], [r.text[:200] for r in rs]
+        assert len({r.json()["id"] for r in rs}) == 1

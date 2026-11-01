@@ -4,7 +4,7 @@ UV ?= uv
 PORT ?= 8000
 export SP_TEST_DB ?= stockpilot_test
 
-.PHONY: help setup test lint fmt run seed openapi migrate audit clean ingest-xbrl ingest-filings
+.PHONY: help setup test lint fmt run seed openapi migrate audit clean ingest-xbrl ingest-filings eval
 
 help:
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/'
@@ -43,6 +43,9 @@ ingest-xbrl: ## SEC companyfacts -> xbrl_facts for the universe (live network; B
 
 ingest-filings: ## latest 10-K + 8-K list -> raw_documents/doc_chunks (live network; BE-12). TICKERS=A,B optional
 	$(UV) run python -m app.modules.research.cli ingest-filings $(if $(TICKERS),--tickers $(TICKERS),)
+
+eval: ## golden-set / safety / persona-simulation evals -> evals/results/latest.json (BE-20). FAST=1 skips the pytest-backed checks
+	$(UV) run python -m evals.run $(if $(FAST),--fast,)
 
 openapi: ## regenerate docs/contracts/openapi.json
 	$(UV) run python -m scripts.dump_openapi

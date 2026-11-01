@@ -233,3 +233,12 @@ def test_style_card_validates_against_stream_bs_model_and_cold_start_follows_its
     parsed = StyleCard.model_validate(card)
     assert parsed.order == CONSERVATIVE_ORDER and parsed.jargon == 1 and parsed.depth == "standard"
     assert parsed.metric == "dividend_yield"
+
+
+def test_style_card_explicit_user_choices_win_over_derived_values() -> None:
+    """CR-13: PATCH /profile style choices live under `explicit` and must survive the learned-feature job."""
+    existing = {"explicit": {"jargon": 3, "depth": "tldr", "metric": "Revenue growth", "tone": "Direct"}}
+    c = _card(existing=existing, experience="Beginner", goals=["Income"])
+    assert (c["jargon"], c["depth"], c["metric"], c["tone"]) == (3, "tldr", "Revenue growth", "Direct")
+    assert c["metrics"] == ["Revenue growth"]
+    assert c["explicit"] == existing["explicit"]

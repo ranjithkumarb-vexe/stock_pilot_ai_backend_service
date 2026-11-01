@@ -17,7 +17,13 @@ from app.modules.llm.trace import TraceRecorder, use_trace
 from app.modules.research.brief import templates  # noqa: F401  (registers the mock "brief_claims" handler)
 from app.modules.research.brief.generate import generate_brief
 from app.modules.research.brief.schemas import BriefOut, CitationOut
-from app.modules.research.brief.store import citation_detail, find_cached, save_brief, to_brief_out
+from app.modules.research.brief.store import (
+    citation_detail,
+    find_cached,
+    lock_brief_key,
+    save_brief,
+    to_brief_out,
+)
 from app.modules.research.brief.style import load_style_card
 
 router = APIRouter(tags=["research"])
@@ -43,6 +49,7 @@ async def _build_and_store(
     as_of: date,
 ) -> BriefOut:
     style = await load_style_card(conn, user.user_id)
+    await lock_brief_key(conn, user.user_id, symbol, as_of, style.style_hash())
     price_source: PriceSource | None = getattr(request.app.state, "price_source", None)
     rec = TraceRecorder(f"brief:{symbol}", user_id=user.user_id, clock=clock)
     with use_trace(rec):
@@ -65,6 +72,7 @@ async def get_brief(
     sym = await _check_symbol(conn, symbol)
     as_of = clock.now().date()
     style = await load_style_card(conn, user.user_id)
+    await lock_brief_key(conn, user.user_id, sym, as_of, style.style_hash())
     cached = await find_cached(conn, user.user_id, sym, as_of, style.style_hash())
     if cached is not None:
         return to_brief_out(cached)

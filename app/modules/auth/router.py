@@ -8,7 +8,8 @@ from app.core.auth import create_stream_token, issue_dev_token
 from app.core.clock import Clock
 from app.core.db import user_tx
 from app.core.deps import CurrentUser, SettingsDep, UserConn
-from app.core.errors import not_found
+from app.core.errors import not_found, upstream_unavailable
+from app.core.logging import get_logger
 from app.core.users import KnownUsers
 from app.modules.auth import service
 from app.modules.auth.schemas import (
@@ -18,8 +19,10 @@ from app.modules.auth.schemas import (
     MeResponse,
     StreamTokenResponse,
 )
+from app.modules.profile import supabase_admin
 
 router = APIRouter(tags=["auth"])
+log = get_logger(__name__)
 
 
 @router.post("/auth/dev-login", response_model=DevLoginResponse, summary="Dev-only persona login")
@@ -48,10 +51,24 @@ async def stream_token(user: CurrentUser, request: Request, settings: SettingsDe
 
 @router.delete("/account", status_code=204, summary="Delete the account and all of its data")
 async def delete_account(
-    body: DeleteAccountRequest, user: CurrentUser, conn: UserConn, request: Request
+    body: DeleteAccountRequest,
+    user: CurrentUser,
+    conn: UserConn,
+    request: Request,
+    settings: SettingsDep,
 ) -> Response:
     del body  # validated: {"confirm": "DELETE"}
     await service.delete_account(conn, user.user_id)
+    # CR-3: also remove the Supabase auth user (no-op without SUPABASE_URL + service-role key). It runs
+    # before the local transaction commits: if Supabase is down we roll the local delete back (503) and the
+    # client can simply retry; deleting an already-deleted auth user is a success (404 is treated as done).
+    try:
+        await supabase_admin.delete_auth_user(settings, user.user_id)
+    except Exception as exc:
+        log.error("supabase auth user deletion failed", extra={"error_type": type(exc).__name__})
+        raise upstream_unavailable(
+            "Could not finish deleting your sign-in account. Please try again."
+        ) from exc
     known: KnownUsers = request.app.state.known_users
     known.forget(user.user_id)
     return Response(status_code=204)

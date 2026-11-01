@@ -1,6 +1,170 @@
 {
   "components": {
     "schemas": {
+      "AlertActionIn": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "enum": [
+              "open",
+              "dismiss",
+              "snooze",
+              "restore"
+            ],
+            "title": "Action",
+            "type": "string"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "title": "AlertActionIn",
+        "type": "object"
+      },
+      "AlertOut": {
+        "properties": {
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "critical": {
+            "title": "Critical",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "materiality": {
+            "title": "Materiality",
+            "type": "number"
+          },
+          "snoozed_until": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snoozed Until"
+          },
+          "source_label": {
+            "title": "Source Label",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "new",
+              "opened",
+              "dismissed",
+              "snoozed"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "symbol": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Symbol"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "breach",
+              "filing",
+              "move",
+              "earnings",
+              "mirror",
+              "concentration"
+            ],
+            "title": "Type",
+            "type": "string"
+          },
+          "why": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Why"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "symbol",
+          "critical",
+          "materiality",
+          "title",
+          "body",
+          "source_label",
+          "state",
+          "created_at"
+        ],
+        "title": "AlertOut",
+        "type": "object"
+      },
+      "AlertsPage": {
+        "properties": {
+          "fatigue_index": {
+            "title": "Fatigue Index",
+            "type": "number"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AlertOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "min_materiality": {
+            "title": "Min Materiality",
+            "type": "number"
+          },
+          "move_threshold": {
+            "title": "Move Threshold",
+            "type": "number"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items",
+          "move_threshold",
+          "fatigue_index",
+          "min_materiality"
+        ],
+        "title": "AlertsPage",
+        "type": "object"
+      },
       "BarOut": {
         "properties": {
           "close": {
@@ -212,6 +376,98 @@
           "citation_ids"
         ],
         "title": "CaseOut",
+        "type": "object"
+      },
+      "ChatRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "message": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Message",
+            "type": "string"
+          },
+          "thread_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thread Id"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "title": "ChatRequest",
+        "type": "object"
+      },
+      "ChatResponse": {
+        "properties": {
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "citations": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Citations",
+            "type": "array"
+          },
+          "grounded": {
+            "title": "Grounded",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "intent": {
+            "title": "Intent",
+            "type": "string"
+          },
+          "refusal_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Refusal Reason"
+          },
+          "refused": {
+            "title": "Refused",
+            "type": "boolean"
+          },
+          "thread_id": {
+            "title": "Thread Id",
+            "type": "string"
+          },
+          "trace_id": {
+            "title": "Trace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "thread_id",
+          "answer",
+          "citations",
+          "refused",
+          "refusal_reason",
+          "trace_id",
+          "intent",
+          "grounded"
+        ],
+        "title": "ChatResponse",
         "type": "object"
       },
       "CheckOut": {
@@ -651,6 +907,105 @@
         "title": "DevMarketResponse",
         "type": "object"
       },
+      "EvalItem": {
+        "additionalProperties": true,
+        "properties": {
+          "actual": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Actual"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "pass",
+              "fail"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "target": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Target"
+          }
+        },
+        "required": [
+          "id",
+          "description",
+          "target",
+          "actual",
+          "status"
+        ],
+        "title": "EvalItem",
+        "type": "object"
+      },
+      "EvalsLatest": {
+        "additionalProperties": true,
+        "description": "`items` / `generated_at` / `thresholds_met` are the contract; the rest documents the run.",
+        "properties": {
+          "generated_at": {
+            "title": "Generated At",
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EvalItem"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "not_measured": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Not Measured",
+            "type": "array"
+          },
+          "summary": {
+            "additionalProperties": true,
+            "title": "Summary",
+            "type": "object"
+          },
+          "thresholds_met": {
+            "title": "Thresholds Met",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "generated_at",
+          "thresholds_met",
+          "items"
+        ],
+        "title": "EvalsLatest",
+        "type": "object"
+      },
       "EventsRequest": {
         "additionalProperties": false,
         "properties": {
@@ -686,6 +1041,81 @@
           "rejected"
         ],
         "title": "EventsResponse",
+        "type": "object"
+      },
+      "FeedItemOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "item": {
+            "additionalProperties": true,
+            "title": "Item",
+            "type": "object"
+          },
+          "kind": {
+            "enum": [
+              "alert",
+              "proposal",
+              "briefing"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "pinned": {
+            "title": "Pinned",
+            "type": "boolean"
+          },
+          "score": {
+            "title": "Score",
+            "type": "number"
+          },
+          "why": {
+            "$ref": "#/components/schemas/WhyOut"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "pinned",
+          "score",
+          "item",
+          "why"
+        ],
+        "title": "FeedItemOut",
+        "type": "object"
+      },
+      "FeedPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FeedItemOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "FeedPage",
         "type": "object"
       },
       "FillOut": {
@@ -764,6 +1194,105 @@
           "status"
         ],
         "title": "HealthStatus",
+        "type": "object"
+      },
+      "HistoryItem": {
+        "properties": {
+          "citations": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Citations",
+            "type": "array"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "refusal_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Refusal Reason"
+          },
+          "refused": {
+            "title": "Refused",
+            "type": "boolean"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "thread_id": {
+            "title": "Thread Id",
+            "type": "string"
+          },
+          "trace_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trace Id"
+          }
+        },
+        "required": [
+          "id",
+          "thread_id",
+          "role",
+          "text",
+          "created_at",
+          "refused",
+          "refusal_reason",
+          "citations",
+          "trace_id"
+        ],
+        "title": "HistoryItem",
+        "type": "object"
+      },
+      "HistoryOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/HistoryItem"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "HistoryOut",
         "type": "object"
       },
       "LedgerEntryOut": {
@@ -1122,6 +1651,17 @@
       "OrderDraft": {
         "description": "Preview of an order that has not been placed.",
         "properties": {
+          "est_cash_after": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Est Cash After"
+          },
           "est_cost": {
             "anyOf": [
               {
@@ -1915,6 +2455,37 @@
         "title": "RecomputeResponse",
         "type": "object"
       },
+      "RefreshOut": {
+        "properties": {
+          "created": {
+            "title": "Created",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AlertOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "move_threshold": {
+            "title": "Move Threshold",
+            "type": "number"
+          },
+          "resolved": {
+            "title": "Resolved",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "created",
+          "resolved",
+          "items",
+          "move_threshold"
+        ],
+        "title": "RefreshOut",
+        "type": "object"
+      },
       "RejectedEvent": {
         "properties": {
           "index": {
@@ -2090,6 +2661,34 @@
         "title": "SectionOut",
         "type": "object"
       },
+      "StepOut": {
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "ms": {
+            "title": "Ms",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "outcome": {
+            "title": "Outcome",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "ms",
+          "outcome",
+          "detail"
+        ],
+        "title": "StepOut",
+        "type": "object"
+      },
       "StreamTokenResponse": {
         "properties": {
           "expires_in": {
@@ -2152,6 +2751,114 @@
         "title": "StyleCardOut",
         "type": "object"
       },
+      "TraceList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TraceOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "TraceList",
+        "type": "object"
+      },
+      "TraceOut": {
+        "properties": {
+          "cost_usd": {
+            "title": "Cost Usd",
+            "type": "number"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "duration_ms": {
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "mode": {
+            "title": "Mode",
+            "type": "string"
+          },
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "outcome": {
+            "title": "Outcome",
+            "type": "string"
+          },
+          "scope": {
+            "title": "Scope",
+            "type": "string"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/StepOut"
+            },
+            "title": "Steps",
+            "type": "array"
+          },
+          "tokens_in": {
+            "title": "Tokens In",
+            "type": "integer"
+          },
+          "tokens_out": {
+            "title": "Tokens Out",
+            "type": "integer"
+          },
+          "trace_id": {
+            "title": "Trace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "trace_id",
+          "name",
+          "model",
+          "mode",
+          "duration_ms",
+          "tokens_in",
+          "tokens_out",
+          "cost_usd",
+          "outcome",
+          "kind",
+          "scope",
+          "created_at"
+        ],
+        "title": "TraceOut",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -2190,6 +2897,94 @@
           "type"
         ],
         "title": "ValidationError",
+        "type": "object"
+      },
+      "WhyFeature": {
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "weight": {
+            "title": "Weight",
+            "type": "number"
+          }
+        },
+        "required": [
+          "name",
+          "weight",
+          "detail"
+        ],
+        "title": "WhyFeature",
+        "type": "object"
+      },
+      "WhyOut": {
+        "properties": {
+          "basis": {
+            "enum": [
+              "profile",
+              "behaviour",
+              "cold_start"
+            ],
+            "title": "Basis",
+            "type": "string"
+          },
+          "rules_checked": {
+            "items": {
+              "$ref": "#/components/schemas/WhyRule"
+            },
+            "title": "Rules Checked",
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Sources",
+            "type": "array"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "top_features": {
+            "items": {
+              "$ref": "#/components/schemas/WhyFeature"
+            },
+            "title": "Top Features",
+            "type": "array"
+          }
+        },
+        "required": [
+          "summary",
+          "top_features",
+          "rules_checked",
+          "sources",
+          "basis"
+        ],
+        "title": "WhyOut",
+        "type": "object"
+      },
+      "WhyRule": {
+        "properties": {
+          "passed": {
+            "title": "Passed",
+            "type": "boolean"
+          },
+          "rule": {
+            "title": "Rule",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rule",
+          "passed"
+        ],
+        "title": "WhyRule",
         "type": "object"
       }
     }
@@ -2273,6 +3068,328 @@
         "summary": "Delete the account and all of its data",
         "tags": [
           "auth"
+        ]
+      }
+    },
+    "/v1/alerts": {
+      "get": {
+        "operationId": "list_alerts_v1_alerts_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "breach",
+                    "filing",
+                    "move",
+                    "earnings",
+                    "mirror",
+                    "concentration"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Type"
+            }
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 16,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "State"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertsPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "My alerts (newest first)",
+        "tags": [
+          "alerts"
+        ]
+      }
+    },
+    "/v1/alerts/refresh": {
+      "post": {
+        "operationId": "refresh_alerts_v1_alerts_refresh_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Evaluate my alerts now (on demand)",
+        "tags": [
+          "alerts"
+        ]
+      }
+    },
+    "/v1/alerts/{alert_id}/action": {
+      "post": {
+        "operationId": "alert_action_v1_alerts__alert_id__action_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "alert_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Alert Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertActionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Open, dismiss, snooze 24 h or restore",
+        "tags": [
+          "alerts"
+        ]
+      }
+    },
+    "/v1/audit/traces": {
+      "get": {
+        "operationId": "traces_v1_audit_traces_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "outcome",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "ok",
+                    "blocked",
+                    "error"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Outcome"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "brief",
+                    "chat",
+                    "ingest"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TraceList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Your recent brief/chat traces (+ system injection blocks)",
+        "tags": [
+          "audit"
+        ]
+      }
+    },
+    "/v1/audit/traces/{trace_ref}": {
+      "get": {
+        "operationId": "trace_v1_audit_traces__trace_ref__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "trace_ref",
+            "required": true,
+            "schema": {
+              "title": "Trace Ref",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TraceOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "One trace with its steps",
+        "tags": [
+          "audit"
         ]
       }
     },
@@ -2399,6 +3516,125 @@
         "summary": "Regenerate the brief now",
         "tags": [
           "research"
+        ]
+      }
+    },
+    "/v1/chat": {
+      "post": {
+        "operationId": "post_chat_v1_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ask a question about your portfolio, rules or ingested filings",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
+    "/v1/chat/history": {
+      "get": {
+        "operationId": "get_history_v1_chat_history_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "thread_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Thread Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoryOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Messages of a thread (default: the latest)",
+        "tags": [
+          "chat"
         ]
       }
     },
@@ -2548,6 +3784,27 @@
         ]
       }
     },
+    "/v1/evals/latest": {
+      "get": {
+        "operationId": "evals_latest_v1_evals_latest_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvalsLatest"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Scoreboard from the latest `make eval` run",
+        "tags": [
+          "evals"
+        ]
+      }
+    },
     "/v1/events": {
       "post": {
         "operationId": "post_events_v1_events_post",
@@ -2586,6 +3843,68 @@
         "summary": "Ingest a batch of client events",
         "tags": [
           "events"
+        ]
+      }
+    },
+    "/v1/feed": {
+      "get": {
+        "operationId": "get_feed_v1_feed_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 16,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ranked feed: alerts, proposals and the daily briefing",
+        "tags": [
+          "feed"
         ]
       }
     },
@@ -3737,6 +5056,57 @@
         "summary": "Add a supported ticker (idempotent)",
         "tags": [
           "watchlist"
+        ]
+      }
+    },
+    "/v1/why/{output_type}/{output_id}": {
+      "get": {
+        "operationId": "get_why_v1_why__output_type___output_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "output_type",
+            "required": true,
+            "schema": {
+              "title": "Output Type",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "output_id",
+            "required": true,
+            "schema": {
+              "title": "Output Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WhyOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Why am I seeing this?",
+        "tags": [
+          "feed"
         ]
       }
     }

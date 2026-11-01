@@ -14,6 +14,19 @@ from app.modules.research.brief.schemas import BriefOut, CitationOut
 EXCERPT_CHARS = 1200
 
 
+async def lock_brief_key(conn: Connection, user_id: UUID, symbol: str, as_of: date, style_hash: str) -> None:
+    """Serialise generation per cache key for the rest of this transaction (transaction-scoped advisory lock).
+
+    Without it two concurrent first requests (the UI asks for the same brief from several widgets at once)
+    both miss the cache, both generate, and the second INSERT dies on the unique key (500). With it the second
+    request waits, then finds the first request's committed row in `find_cached`.
+    """
+    await conn.execute(
+        "select pg_advisory_xact_lock(hashtextextended($1, 0))",
+        f"brief:{user_id}:{symbol}:{as_of.isoformat()}:{style_hash}",
+    )
+
+
 async def find_cached(
     conn: Connection, user_id: UUID, symbol: str, as_of: date, style_hash: str
 ) -> dict[str, Any] | None:

@@ -8,6 +8,7 @@ from typing import Any
 from uuid import UUID
 
 import httpx
+import pytest
 
 from app.core.auth import consume_stream_token, hash_stream_token
 from app.core.clock import FakeClock
@@ -138,3 +139,52 @@ async def test_delete_account_cascades_everything_and_anonymises_audit(
     assert deleted and deleted[0]["user_id"] is None and deleted[0]["details"]["anonymised"] is True
     assert await db_admin.fetchval("select count(*) from audit_log where user_id = $1", owner.user_id) == 0
     await db_admin.execute("delete from users where id = $1", other.user_id)
+
+
+async def test_delete_account_calls_supabase_admin_delete(
+    app_client: httpx.AsyncClient,
+    make_user: Callable[..., Any],
+    auth_headers: Callable[..., Any],
+    db_admin: Conn,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """CR-3: DELETE /account also removes the Supabase auth user (id passed through, settings injected)."""
+    from app.modules.profile import supabase_admin
+
+    seen: list[UUID] = []
+
+    async def fake_delete(_settings: Any, user_id: UUID, client: Any = None) -> bool:
+        seen.append(user_id)
+        return True
+
+    monkeypatch.setattr(supabase_admin, "delete_auth_user", fake_delete)
+    uid = await make_user()
+    resp = await app_client.request(
+        "DELETE", "/v1/account", json={"confirm": "DELETE"}, headers=auth_headers(uid)
+    )
+    assert resp.status_code == 204
+    assert seen == [uid]
+    assert await db_admin.fetchval("select count(*) from users where id = $1", uid) == 0
+
+
+async def test_delete_account_rolls_back_when_supabase_fails(
+    app_client: httpx.AsyncClient,
+    make_user: Callable[..., Any],
+    auth_headers: Callable[..., Any],
+    db_admin: Conn,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """If the auth provider cannot delete the user the local delete is rolled back (503) so a retry is safe."""
+    from app.modules.profile import supabase_admin
+
+    async def boom(_settings: Any, user_id: UUID, client: Any = None) -> bool:
+        raise httpx.ConnectError("down")
+
+    monkeypatch.setattr(supabase_admin, "delete_auth_user", boom)
+    uid = await make_user()
+    resp = await app_client.request(
+        "DELETE", "/v1/account", json={"confirm": "DELETE"}, headers=auth_headers(uid)
+    )
+    assert resp.status_code == 503
+    assert resp.json()["code"] == "upstream_unavailable"
+    assert await db_admin.fetchval("select count(*) from users where id = $1", uid) == 1

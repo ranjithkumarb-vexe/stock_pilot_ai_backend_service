@@ -198,6 +198,7 @@ async def preview_order(
         "order": {
             "symbol": intent.symbol, "side": intent.side, "type": intent.type, "qty": intent.qty,
             "limit_price": intent.limit_price, "est_price": ev.est_price, "est_cost": est_cost,
+            "est_cash_after": ev.state.cash - est_cost if intent.side == "buy" else ev.state.cash + est_cost,
             "will": None if ev.summary.blocked else ev.decision.action,
         },
         "fill": None,

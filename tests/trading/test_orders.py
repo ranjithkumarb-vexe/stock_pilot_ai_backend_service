@@ -357,6 +357,11 @@ async def test_preview_matches_design_labels_and_does_not_write(
     )
     j = r.json()
     assert j["blocked"] is False and j["order"]["will"] == "queue"
+    # integration pass 1: the preview carries the cash the account would hold afterwards (sell: + proceeds)
+    cash_now = await db_admin.fetchval(
+        "select coalesce(sum(amount), 0) from cash_ledger where user_id = $1", uid
+    )
+    assert abs(j["order"]["est_cash_after"] - (float(cash_now) + j["order"]["est_cost"])) < 0.011
     assert j["checks"][0] == {
         "key": "shares",
         "ok": True,

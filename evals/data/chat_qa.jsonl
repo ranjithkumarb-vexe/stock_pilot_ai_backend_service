@@ -1,0 +1,46 @@
+{"id": "cqa-a01", "text": "What are the main risks in KO's 10-K?", "expect": "grounded", "intent": "filing_text", "needs_user": false}
+{"id": "cqa-a02", "text": "What does NVDA say about competition?", "expect": "grounded", "intent": "filing_text", "needs_user": false}
+{"id": "cqa-a03", "text": "What does Apple say about its suppliers?", "expect": "grounded", "intent": "filing_text", "needs_user": false}
+{"id": "cqa-a04", "text": "Describe Microsoft's business", "expect": "grounded", "intent": "filing_text", "needs_user": false}
+{"id": "cqa-a05", "text": "What does Johnson & Johnson disclose about litigation?", "expect": "grounded", "intent": "filing_text", "needs_user": false}
+{"id": "cqa-a06", "text": "What does Exxon Mobil say about climate regulation?", "expect": "grounded", "intent": "filing_text", "needs_user": false}
+{"id": "cqa-a07", "text": "What are the risk factors for PEP?", "expect": "grounded", "intent": "filing_text", "needs_user": false}
+{"id": "cqa-a08", "text": "What does Verizon say about competition?", "expect": "grounded", "intent": "filing_text", "needs_user": false}
+{"id": "cqa-a09", "text": "What does JPMorgan Chase say about regulation?", "expect": "grounded", "intent": "filing_text", "needs_user": false}
+{"id": "cqa-a10", "text": "Tell me about Procter & Gamble's business", "expect": "grounded", "intent": "filing_text", "needs_user": false}
+{"id": "cqa-a11", "text": "What did Amazon report for revenue growth?", "expect": "grounded", "intent": "filing_metric", "needs_user": false}
+{"id": "cqa-a12", "text": "Show me the debt to equity of PEP", "expect": "grounded", "intent": "filing_metric", "needs_user": false}
+{"id": "cqa-a13", "text": "What was Tesla's operating margin?", "expect": "grounded", "intent": "filing_metric", "needs_user": false}
+{"id": "cqa-a14", "text": "What is Meta's free cash flow?", "expect": "grounded", "intent": "filing_metric", "needs_user": false}
+{"id": "cqa-a15", "text": "What was Alphabet's diluted EPS?", "expect": "grounded", "intent": "filing_metric", "needs_user": false}
+{"id": "cqa-a16", "text": "What is Broadcom's net income?", "expect": "grounded", "intent": "filing_metric", "needs_user": false}
+{"id": "cqa-u01", "text": "How concentrated is my portfolio?", "expect": "grounded", "intent": "portfolio_concentration", "needs_user": true}
+{"id": "cqa-u02", "text": "What is my concentration?", "expect": "grounded", "intent": "portfolio_concentration", "needs_user": true}
+{"id": "cqa-u03", "text": "How is my portfolio doing against my rules?", "expect": "grounded", "intent": "portfolio_risk", "needs_user": true}
+{"id": "cqa-u04", "text": "Is my drawdown inside my limit?", "expect": "grounded", "intent": "portfolio_risk", "needs_user": true}
+{"id": "cqa-u05", "text": "Show me my holdings", "expect": "grounded", "intent": "portfolio_overview", "needs_user": true}
+{"id": "cqa-u06", "text": "How much cash do I have in my account?", "expect": "grounded", "intent": "portfolio_overview", "needs_user": true}
+{"id": "cqa-g01", "text": "Explain what a P/E ratio means", "expect": "grounded", "intent": "glossary", "needs_user": false}
+{"id": "cqa-g02", "text": "What is the difference between a 10-K and an 8-K?", "expect": "grounded", "intent": "glossary", "needs_user": false}
+{"id": "cqa-g03", "text": "What is HHI?", "expect": "grounded", "intent": "glossary", "needs_user": false}
+{"id": "cqa-g04", "text": "How do I raise my position cap rule?", "expect": "grounded", "intent": "app_help", "needs_user": false}
+{"id": "cqa-n01", "text": "What is Apple's CEO's favourite colour?", "expect": "not_found", "intent": null, "needs_user": false}
+{"id": "cqa-n02", "text": "How many Nvidia employees live in Antarctica?", "expect": "not_found", "intent": null, "needs_user": false}
+{"id": "cqa-n03", "text": "What does Tesla say about its Mars colony?", "expect": "not_found", "intent": null, "needs_user": false}
+{"id": "cqa-n04", "text": "What did Microsoft disclose about unicorn breeding?", "expect": "not_found", "intent": null, "needs_user": false}
+{"id": "cqa-n05", "text": "What is Johnson & Johnson's secret sauce recipe?", "expect": "not_found", "intent": null, "needs_user": false}
+{"id": "cqa-n06", "text": "How many pizzas did Amazon deliver to the Moon?", "expect": "not_found", "intent": null, "needs_user": false}
+{"id": "cqa-n07", "text": "What is Netflix's revenue?", "expect": "not_found", "intent": null, "needs_user": false}
+{"id": "cqa-n08", "text": "How much debt does Palantir have?", "expect": "not_found", "intent": null, "needs_user": false}
+{"id": "cqa-n09", "text": "What did Zoom report for net income?", "expect": "not_found", "intent": null, "needs_user": false}
+{"id": "cqa-n10", "text": "Who won the 2022 World Cup?", "expect": "not_found", "intent": null, "needs_user": false}
+{"id": "cqa-n11", "text": "What is the capital of France?", "expect": "not_found", "intent": null, "needs_user": false}
+{"id": "cqa-n12", "text": "Write me a poem about the stock market", "expect": "not_found", "intent": null, "needs_user": false}
+{"id": "cqa-n13", "text": "What was Apple's revenue in 1850?", "expect": "not_found", "intent": null, "needs_user": false}
+{"id": "cqa-n14", "text": "What did Exxon say about its dragon research programme?", "expect": "not_found", "intent": null, "needs_user": false}
+{"id": "cqa-n15", "text": "What is Coca-Cola's policy on time travel?", "expect": "not_found", "intent": null, "needs_user": false}
+{"id": "cqa-n16", "text": "Which planet is closest to the sun?", "expect": "not_found", "intent": null, "needs_user": false}
+{"id": "cqa-n17", "text": "How tall is the CEO of Meta?", "expect": "not_found", "intent": null, "needs_user": false}
+{"id": "cqa-n18", "text": "What is the weather in Seattle?", "expect": "not_found", "intent": null, "needs_user": false}
+{"id": "cqa-n19", "text": "What did Verizon report for lunar data centers?", "expect": "not_found", "intent": null, "needs_user": false}
+{"id": "cqa-n20", "text": "What does PepsiCo say about its submarine fleet?", "expect": "not_found", "intent": null, "needs_user": false}

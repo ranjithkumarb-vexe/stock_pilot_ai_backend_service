@@ -1,0 +1,260 @@
+{
+ "description": "Replay of 30 8-K acceptances across one regular session (minute-level EDGAR acceptanceDateTime). Used by T-ALERT-02.",
+ "filings": [
+  {
+   "symbol": "QT1",
+   "accession_no": "0009999999-26-001000",
+   "items": [
+    "2.02",
+    "9.01"
+   ],
+   "accepted_at": "2026-10-30T13:42:34Z"
+  },
+  {
+   "symbol": "QT2",
+   "accession_no": "0009999999-26-001001",
+   "items": [
+    "8.01"
+   ],
+   "accepted_at": "2026-10-30T13:49:26Z"
+  },
+  {
+   "symbol": "QS1",
+   "accession_no": "0009999999-26-001002",
+   "items": [
+    "5.02"
+   ],
+   "accepted_at": "2026-10-30T14:12:59Z"
+  },
+  {
+   "symbol": "QS2",
+   "accession_no": "0009999999-26-001003",
+   "items": [
+    "1.01",
+    "9.01"
+   ],
+   "accepted_at": "2026-10-30T14:33:20Z"
+  },
+  {
+   "symbol": "QH1",
+   "accession_no": "0009999999-26-001004",
+   "items": [
+    "7.01",
+    "9.01"
+   ],
+   "accepted_at": "2026-10-30T14:42:05Z"
+  },
+  {
+   "symbol": "QT1",
+   "accession_no": "0009999999-26-001005",
+   "items": [
+    "2.06"
+   ],
+   "accepted_at": "2026-10-30T14:45:03Z"
+  },
+  {
+   "symbol": "QT2",
+   "accession_no": "0009999999-26-001006",
+   "items": [
+    "2.02",
+    "9.01"
+   ],
+   "accepted_at": "2026-10-30T14:52:30Z"
+  },
+  {
+   "symbol": "QS1",
+   "accession_no": "0009999999-26-001007",
+   "items": [
+    "8.01"
+   ],
+   "accepted_at": "2026-10-30T15:22:21Z"
+  },
+  {
+   "symbol": "QS2",
+   "accession_no": "0009999999-26-001008",
+   "items": [
+    "5.02"
+   ],
+   "accepted_at": "2026-10-30T15:44:25Z"
+  },
+  {
+   "symbol": "QH1",
+   "accession_no": "0009999999-26-001009",
+   "items": [
+    "1.01",
+    "9.01"
+   ],
+   "accepted_at": "2026-10-30T15:48:56Z"
+  },
+  {
+   "symbol": "QT1",
+   "accession_no": "0009999999-26-001010",
+   "items": [
+    "7.01",
+    "9.01"
+   ],
+   "accepted_at": "2026-10-30T15:55:49Z"
+  },
+  {
+   "symbol": "QT2",
+   "accession_no": "0009999999-26-001011",
+   "items": [
+    "2.06"
+   ],
+   "accepted_at": "2026-10-30T15:57:31Z"
+  },
+  {
+   "symbol": "QS1",
+   "accession_no": "0009999999-26-001012",
+   "items": [
+    "2.02",
+    "9.01"
+   ],
+   "accepted_at": "2026-10-30T16:20:11Z"
+  },
+  {
+   "symbol": "QS2",
+   "accession_no": "0009999999-26-001013",
+   "items": [
+    "8.01"
+   ],
+   "accepted_at": "2026-10-30T16:23:56Z"
+  },
+  {
+   "symbol": "QH1",
+   "accession_no": "0009999999-26-001014",
+   "items": [
+    "5.02"
+   ],
+   "accepted_at": "2026-10-30T16:29:39Z"
+  },
+  {
+   "symbol": "QT1",
+   "accession_no": "0009999999-26-001015",
+   "items": [
+    "1.01",
+    "9.01"
+   ],
+   "accepted_at": "2026-10-30T17:00:15Z"
+  },
+  {
+   "symbol": "QT2",
+   "accession_no": "0009999999-26-001016",
+   "items": [
+    "7.01",
+    "9.01"
+   ],
+   "accepted_at": "2026-10-30T17:01:19Z"
+  },
+  {
+   "symbol": "QS1",
+   "accession_no": "0009999999-26-001017",
+   "items": [
+    "2.06"
+   ],
+   "accepted_at": "2026-10-30T17:15:43Z"
+  },
+  {
+   "symbol": "QS2",
+   "accession_no": "0009999999-26-001018",
+   "items": [
+    "2.02",
+    "9.01"
+   ],
+   "accepted_at": "2026-10-30T17:54:58Z"
+  },
+  {
+   "symbol": "QH1",
+   "accession_no": "0009999999-26-001019",
+   "items": [
+    "8.01"
+   ],
+   "accepted_at": "2026-10-30T18:09:56Z"
+  },
+  {
+   "symbol": "QT1",
+   "accession_no": "0009999999-26-001020",
+   "items": [
+    "5.02"
+   ],
+   "accepted_at": "2026-10-30T18:16:24Z"
+  },
+  {
+   "symbol": "QT2",
+   "accession_no": "0009999999-26-001021",
+   "items": [
+    "1.01",
+    "9.01"
+   ],
+   "accepted_at": "2026-10-30T18:32:35Z"
+  },
+  {
+   "symbol": "QS1",
+   "accession_no": "0009999999-26-001022",
+   "items": [
+    "7.01",
+    "9.01"
+   ],
+   "accepted_at": "2026-10-30T18:54:38Z"
+  },
+  {
+   "symbol": "QS2",
+   "accession_no": "0009999999-26-001023",
+   "items": [
+    "2.06"
+   ],
+   "accepted_at": "2026-10-30T19:07:41Z"
+  },
+  {
+   "symbol": "QH1",
+   "accession_no": "0009999999-26-001024",
+   "items": [
+    "2.02",
+    "9.01"
+   ],
+   "accepted_at": "2026-10-30T19:14:56Z"
+  },
+  {
+   "symbol": "QT1",
+   "accession_no": "0009999999-26-001025",
+   "items": [
+    "8.01"
+   ],
+   "accepted_at": "2026-10-30T19:45:09Z"
+  },
+  {
+   "symbol": "QT2",
+   "accession_no": "0009999999-26-001026",
+   "items": [
+    "5.02"
+   ],
+   "accepted_at": "2026-10-30T19:49:40Z"
+  },
+  {
+   "symbol": "QS1",
+   "accession_no": "0009999999-26-001027",
+   "items": [
+    "1.01",
+    "9.01"
+   ],
+   "accepted_at": "2026-10-30T20:16:11Z"
+  },
+  {
+   "symbol": "QS2",
+   "accession_no": "0009999999-26-001028",
+   "items": [
+    "7.01",
+    "9.01"
+   ],
+   "accepted_at": "2026-10-30T20:43:00Z"
+  },
+  {
+   "symbol": "QH1",
+   "accession_no": "0009999999-26-001029",
+   "items": [
+    "2.06"
+   ],
+   "accepted_at": "2026-10-30T20:53:29Z"
+  }
+ ]
+}

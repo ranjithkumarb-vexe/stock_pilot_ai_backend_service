@@ -266,4 +266,11 @@ def derive_style_card(
             "order": ordered,  # the key stream B's brief generator reads (CR-5); section_order kept for the UI/seed
         }
     )
+    # CR-13: an explicit user choice (PATCH /profile style fields, stored under `explicit`) always wins over
+    # what the job derived, so the stored top-level fields that the brief generator reads keep the choice.
+    explicit = card.get("explicit")
+    if isinstance(explicit, dict):
+        card.update(explicit)
+        if isinstance(explicit.get("metric"), str) and explicit["metric"]:
+            card["metrics"] = [explicit["metric"]]
     return card

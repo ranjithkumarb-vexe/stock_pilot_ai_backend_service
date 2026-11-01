@@ -103,3 +103,13 @@ Nasdaq/NYSE extended-hours conventions, **not** read from a source here; they on
 ## What the simulator is (and is not)
 `SimulatedSource` is a seeded mean-reverting random walk anchored to the last `prices_daily` close (design prices when absent).
 It is labelled `source: "simulated"` on every quote, bar and `/market/status` and is **not market data**.
+
+# Stream D: ranker / feed / alerts (BE-16, BE-17), 2026-11-02
+Nothing in this stream calls a vendor API that was not already verified elsewhere; what is **unverified**:
+- **Live EDGAR submissions polling** (`app.modules.alerts.filings.EdgarSubmissionsSource`): request URL and the `filings.recent` columns it reads
+  (`accessionNumber, form, filingDate, acceptanceDateTime, items, primaryDocument`) follow the already-ingested live payloads used by BE-11/12
+  (`research.filings.parse_submissions`), but `acceptanceDateTime` was only exercised with recorded-shape fixtures. Needs a real `SEC_USER_AGENT`
+  (`ALERTS_EDGAR_LIVE=0` disables it). The 60 s `max_age_s` cache means a ticker is fetched at most once a minute, well inside 8 req/s.
+- **Earnings dates** are not read from any calendar: they are estimated as last Item 2.02 8-K date + the median quarterly gap (default 91 days)
+  and every such alert says "estimated". Replace `FilingHistoryEarnings` with a vendor calendar by implementing `EarningsSource`.
+- **Ranking quality** (NDCG@5 0.84 within 30 events, drift recovery) is measured on synthetic personas only.
