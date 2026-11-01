@@ -1,0 +1,57 @@
+{
+  "detectors": [
+    {
+      "detector": "disposition",
+      "fn": 27,
+      "fp": 14,
+      "n": 200,
+      "precision": 0.839,
+      "recall": 0.73,
+      "tn": 86,
+      "tp": 73
+    },
+    {
+      "detector": "overtrading",
+      "fn": 0,
+      "fp": 0,
+      "n": 200,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tn": 100,
+      "tp": 100
+    },
+    {
+      "detector": "herding",
+      "fn": 0,
+      "fp": 15,
+      "n": 200,
+      "precision": 0.87,
+      "recall": 1.0,
+      "tn": 85,
+      "tp": 100
+    },
+    {
+      "detector": "loss_aversion",
+      "fn": 26,
+      "fp": 10,
+      "n": 200,
+      "precision": 0.881,
+      "recall": 0.74,
+      "tn": 90,
+      "tp": 74
+    },
+    {
+      "detector": "concentration",
+      "fn": 0,
+      "fp": 0,
+      "n": 200,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tn": 110,
+      "tp": 90
+    }
+  ],
+  "n_per_class": 100,
+  "note": "synthetic logs with injected biases; positive prediction = state 'flag'",
+  "seed": 20261101
+}

@@ -1,0 +1,696 @@
+{
+ "personas": {
+  "priya": {
+   "inv": 77985.1,
+   "T": 99999.1,
+   "hhi": 0.11282031945978188,
+   "eff": 8.863651554864454,
+   "day": -287.8183471303506,
+   "dayPct": -0.28782093751878823,
+   "pos": [
+    {
+     "t": "JNJ",
+     "q": 62,
+     "px": 171.8,
+     "v": 10651.6,
+     "c": 152.4,
+     "pnl": 1202.7999999999993,
+     "pp": 12.72965879265091,
+     "w": 10.651695865262788,
+     "ch": -0.22,
+     "s": "Healthcare"
+    },
+    {
+     "t": "KO",
+     "q": 130,
+     "px": 69.4,
+     "v": 9022,
+     "c": 61.8,
+     "pnl": 988,
+     "pp": 12.297734627831725,
+     "w": 9.022081198730788,
+     "ch": 0.15,
+     "s": "Consumer Staples"
+    },
+    {
+     "t": "PG",
+     "q": 60,
+     "px": 156.3,
+     "v": 9378,
+     "c": 149.1,
+     "pnl": 432,
+     "pp": 4.8289738430583595,
+     "w": 9.378084402759624,
+     "ch": -0.48,
+     "s": "Consumer Staples"
+    },
+    {
+     "t": "VZ",
+     "q": 215,
+     "px": 41.9,
+     "v": 9008.5,
+     "c": 39.6,
+     "pnl": 494.5,
+     "pp": 5.8080808080807955,
+     "w": 9.008581077229696,
+     "ch": -4.1,
+     "s": "Communication"
+    },
+    {
+     "t": "PEP",
+     "q": 55,
+     "px": 148.6,
+     "v": 8173,
+     "c": 151.2,
+     "pnl": -143,
+     "pp": -1.7195767195767209,
+     "w": 8.173073557662018,
+     "ch": 0.72,
+     "s": "Consumer Staples"
+    },
+    {
+     "t": "JPM",
+     "q": 28,
+     "px": 301.5,
+     "v": 8442,
+     "c": 248.3,
+     "pnl": 1489.5999999999995,
+     "pp": 21.425694724124035,
+     "w": 8.442075978683809,
+     "ch": 0.19,
+     "s": "Financials"
+    },
+    {
+     "t": "MSFT",
+     "q": 17,
+     "px": 521.6,
+     "v": 8867.2,
+     "c": 468,
+     "pnl": 911.2000000000007,
+     "pp": 11.452991452991457,
+     "w": 8.86727980551825,
+     "ch": 0.27,
+     "s": "Technology"
+    },
+    {
+     "t": "XOM",
+     "q": 70,
+     "px": 114.2,
+     "v": 7994,
+     "c": 108.9,
+     "pnl": 371,
+     "pp": 4.866850321395777,
+     "w": 7.99407194664752,
+     "ch": 0.35,
+     "s": "Energy"
+    },
+    {
+     "t": "AAPL",
+     "q": 24,
+     "px": 268.7,
+     "v": 6448.799999999999,
+     "c": 231.5,
+     "pnl": 892.7999999999993,
+     "pp": 16.069114470842337,
+     "w": 6.4488580397223565,
+     "ch": 0.41,
+     "s": "Technology"
+    }
+   ],
+   "sec": [
+    {
+     "s": "Consumer Staples",
+     "v": 26573,
+     "w": 26.57323915915243
+    },
+    {
+     "s": "Technology",
+     "v": 15316,
+     "w": 15.316137845240608
+    },
+    {
+     "s": "Healthcare",
+     "v": 10651.6,
+     "w": 10.651695865262788
+    },
+    {
+     "s": "Communication",
+     "v": 9008.5,
+     "w": 9.008581077229696
+    },
+    {
+     "s": "Financials",
+     "v": 8442,
+     "w": 8.442075978683809
+    },
+    {
+     "s": "Energy",
+     "v": 7994,
+     "w": 7.99407194664752
+    }
+   ],
+   "proposals": [
+    {
+     "tk": "JNJ",
+     "rule": "pos",
+     "q": 4,
+     "w": 10.651695865262788,
+     "aw": 9.964489680407123,
+     "cap": 10,
+     "name": "JNJ"
+    },
+    {
+     "tk": "PEP",
+     "rule": "sec",
+     "q": 11,
+     "w": 26.57323915915243,
+     "aw": 24.93862444762003,
+     "cap": 25,
+     "name": "Consumer Staples"
+    }
+   ]
+  },
+  "alex": {
+   "inv": 92016.8,
+   "T": 99999.8,
+   "hhi": 0.26050650703451067,
+   "eff": 3.8386757067358963,
+   "day": 1215.2008618447824,
+   "dayPct": 1.2152032922513667,
+   "pos": [
+    {
+     "t": "NVDA",
+     "q": 219,
+     "px": 182.4,
+     "v": 39945.6,
+     "c": 121.5,
+     "pnl": 13337.099999999999,
+     "pp": 50.12345679012347,
+     "w": 39.94567989135978,
+     "ch": 2.14,
+     "s": "Technology"
+    },
+    {
+     "t": "AMD",
+     "q": 97,
+     "px": 164.2,
+     "v": 15927.4,
+     "c": 158.9,
+     "pnl": 514.0999999999985,
+     "pp": 3.3354310887350413,
+     "w": 15.927431854863707,
+     "ch": -1.32,
+     "s": "Technology"
+    },
+    {
+     "t": "TSLA",
+     "q": 38,
+     "px": 342.1,
+     "v": 12999.800000000001,
+     "c": 372.4,
+     "pnl": -1151.3999999999978,
+     "pp": -8.13641245972072,
+     "w": 12.999825999652002,
+     "ch": 3.05,
+     "s": "Consumer Discretionary"
+    },
+    {
+     "t": "META",
+     "q": 14,
+     "px": 718.5,
+     "v": 10059,
+     "c": 642,
+     "pnl": 1071,
+     "pp": 11.91588785046729,
+     "w": 10.059020118040236,
+     "ch": 0.62,
+     "s": "Communication"
+    },
+    {
+     "t": "AMZN",
+     "q": 31,
+     "px": 228.9,
+     "v": 7095.900000000001,
+     "c": 219.6,
+     "pnl": 288.3000000000011,
+     "pp": 4.234972677595628,
+     "w": 7.095914191828384,
+     "ch": 0.88,
+     "s": "Consumer Discretionary"
+    },
+    {
+     "t": "AVGO",
+     "q": 17,
+     "px": 352.3,
+     "v": 5989.1,
+     "c": 301.8,
+     "pnl": 858.5,
+     "pp": 16.732935719019217,
+     "w": 5.989111978223956,
+     "ch": 1.4,
+     "s": "Technology"
+    }
+   ],
+   "sec": [
+    {
+     "s": "Technology",
+     "v": 61862.1,
+     "w": 61.86222372444744
+    },
+    {
+     "s": "Consumer Discretionary",
+     "v": 20095.7,
+     "w": 20.09574019148038
+    },
+    {
+     "s": "Communication",
+     "v": 10059,
+     "w": 10.059020118040236
+    }
+   ],
+   "proposals": [
+    {
+     "tk": "NVDA",
+     "rule": "pos",
+     "q": 82,
+     "w": 39.94567989135978,
+     "aw": 24.98884997769995,
+     "cap": 25,
+     "name": "NVDA"
+    },
+    {
+     "tk": "AMD",
+     "rule": "sec",
+     "q": 73,
+     "w": 61.86222372444744,
+     "aw": 49.8755997511995,
+     "cap": 50,
+     "name": "Technology"
+    }
+   ]
+  }
+ },
+ "checks": [
+  {
+   "pid": "priya",
+   "symbol": "JNJ",
+   "side": "buy",
+   "qty": 10,
+   "rows": [
+    {
+     "l": "Paper cash",
+     "d": "Cost $1,718 of $22,014 available",
+     "mark": "Pass"
+    },
+    {
+     "l": "Max position 10%",
+     "d": "JNJ would be 12.4%",
+     "mark": "Blocked"
+    },
+    {
+     "l": "Max sector 25%",
+     "d": "Healthcare would be 12.4%",
+     "mark": "Pass"
+    },
+    {
+     "l": "Min cash buffer 10%",
+     "d": "Cash after would be 20.3%",
+     "mark": "Pass"
+    },
+    {
+     "l": "Trades per week 3",
+     "d": "1 in the last 7 days",
+     "mark": "Pass"
+    }
+   ],
+   "blocked": true
+  },
+  {
+   "pid": "priya",
+   "symbol": "KO",
+   "side": "sell",
+   "qty": 3,
+   "rows": [
+    {
+     "l": "No shorting (MVP)",
+     "d": "Selling 3 of 130 shares held",
+     "mark": "Pass"
+    },
+    {
+     "l": "Trades per week 3",
+     "d": "1 in the last 7 days",
+     "mark": "Pass"
+    }
+   ],
+   "blocked": false
+  },
+  {
+   "pid": "priya",
+   "symbol": "AAPL",
+   "side": "sell",
+   "qty": 25,
+   "rows": [
+    {
+     "l": "No shorting (MVP)",
+     "d": "You hold 24 shares and cannot sell 25",
+     "mark": "Blocked"
+    },
+    {
+     "l": "Trades per week 3",
+     "d": "1 in the last 7 days",
+     "mark": "Pass"
+    }
+   ],
+   "blocked": true
+  },
+  {
+   "pid": "priya",
+   "symbol": "MSFT",
+   "side": "buy",
+   "qty": 2,
+   "rows": [
+    {
+     "l": "Paper cash",
+     "d": "Cost $1,043 of $22,014 available",
+     "mark": "Pass"
+    },
+    {
+     "l": "Max position 10%",
+     "d": "MSFT would be 9.9%",
+     "mark": "Pass"
+    },
+    {
+     "l": "Max sector 25%",
+     "d": "Technology would be 16.4%",
+     "mark": "Pass"
+    },
+    {
+     "l": "Min cash buffer 10%",
+     "d": "Cash after would be 21.0%",
+     "mark": "Pass"
+    },
+    {
+     "l": "Trades per week 3",
+     "d": "1 in the last 7 days",
+     "mark": "Pass"
+    }
+   ],
+   "blocked": false
+  },
+  {
+   "pid": "priya",
+   "symbol": "PG",
+   "side": "buy",
+   "qty": 100,
+   "rows": [
+    {
+     "l": "Paper cash",
+     "d": "Cost $15,630 of $22,014 available",
+     "mark": "Pass"
+    },
+    {
+     "l": "Max position 10%",
+     "d": "PG would be 25.0%",
+     "mark": "Blocked"
+    },
+    {
+     "l": "Max sector 25%",
+     "d": "Consumer Staples would be 42.2%",
+     "mark": "Blocked"
+    },
+    {
+     "l": "Min cash buffer 10%",
+     "d": "Cash after would be 6.4%",
+     "mark": "Blocked"
+    },
+    {
+     "l": "Trades per week 3",
+     "d": "1 in the last 7 days",
+     "mark": "Pass"
+    }
+   ],
+   "blocked": true
+  },
+  {
+   "pid": "priya",
+   "symbol": "XOM",
+   "side": "buy",
+   "qty": 0,
+   "rows": [
+    {
+     "l": "Quantity",
+     "d": "Enter at least 1 share",
+     "mark": "Blocked"
+    },
+    {
+     "l": "Paper cash",
+     "d": "Cost $0 of $22,014 available",
+     "mark": "Pass"
+    },
+    {
+     "l": "Max position 10%",
+     "d": "XOM would be 8.0%",
+     "mark": "Pass"
+    },
+    {
+     "l": "Max sector 25%",
+     "d": "Energy would be 8.0%",
+     "mark": "Pass"
+    },
+    {
+     "l": "Min cash buffer 10%",
+     "d": "Cash after would be 22.0%",
+     "mark": "Pass"
+    },
+    {
+     "l": "Trades per week 3",
+     "d": "1 in the last 7 days",
+     "mark": "Pass"
+    }
+   ],
+   "blocked": true
+  },
+  {
+   "pid": "priya",
+   "symbol": "GOOGL",
+   "side": "buy",
+   "qty": 5,
+   "rows": [
+    {
+     "l": "Paper cash",
+     "d": "Cost $1,407 of $22,014 available",
+     "mark": "Pass"
+    },
+    {
+     "l": "Max position 10%",
+     "d": "GOOGL would be 1.4%",
+     "mark": "Pass"
+    },
+    {
+     "l": "Max sector 25%",
+     "d": "Communication would be 10.4%",
+     "mark": "Pass"
+    },
+    {
+     "l": "Min cash buffer 10%",
+     "d": "Cash after would be 20.6%",
+     "mark": "Pass"
+    },
+    {
+     "l": "Trades per week 3",
+     "d": "1 in the last 7 days",
+     "mark": "Pass"
+    }
+   ],
+   "blocked": false
+  },
+  {
+   "pid": "priya",
+   "symbol": "PEP",
+   "side": "buy",
+   "qty": 1000,
+   "rows": [
+    {
+     "l": "Paper cash",
+     "d": "Cost $148,600 of $22,014 available",
+     "mark": "Blocked"
+    },
+    {
+     "l": "Max position 10%",
+     "d": "PEP would be 156.8%",
+     "mark": "Blocked"
+    },
+    {
+     "l": "Max sector 25%",
+     "d": "Consumer Staples would be 175.2%",
+     "mark": "Blocked"
+    },
+    {
+     "l": "Min cash buffer 10%",
+     "d": "Cash after would be -126.6%",
+     "mark": "Blocked"
+    },
+    {
+     "l": "Trades per week 3",
+     "d": "1 in the last 7 days",
+     "mark": "Pass"
+    }
+   ],
+   "blocked": true
+  },
+  {
+   "pid": "alex",
+   "symbol": "NVDA",
+   "side": "buy",
+   "qty": 5,
+   "rows": [
+    {
+     "l": "Paper cash",
+     "d": "Cost $912 of $7,983 available",
+     "mark": "Pass"
+    },
+    {
+     "l": "Max position 25%",
+     "d": "NVDA would be 40.9%",
+     "mark": "Blocked"
+    },
+    {
+     "l": "Max sector 50%",
+     "d": "Technology would be 62.8%",
+     "mark": "Blocked"
+    },
+    {
+     "l": "Trades per week 10",
+     "d": "9 in the last 7 days",
+     "mark": "Pass"
+    }
+   ],
+   "blocked": true
+  },
+  {
+   "pid": "alex",
+   "symbol": "TSLA",
+   "side": "sell",
+   "qty": 10,
+   "rows": [
+    {
+     "l": "No shorting (MVP)",
+     "d": "Selling 10 of 38 shares held",
+     "mark": "Pass"
+    },
+    {
+     "l": "Trades per week 10",
+     "d": "9 in the last 7 days",
+     "mark": "Pass"
+    }
+   ],
+   "blocked": false
+  },
+  {
+   "pid": "alex",
+   "symbol": "AMD",
+   "side": "buy",
+   "qty": 20,
+   "rows": [
+    {
+     "l": "Paper cash",
+     "d": "Cost $3,284 of $7,983 available",
+     "mark": "Pass"
+    },
+    {
+     "l": "Max position 25%",
+     "d": "AMD would be 19.2%",
+     "mark": "Pass"
+    },
+    {
+     "l": "Max sector 50%",
+     "d": "Technology would be 65.1%",
+     "mark": "Blocked"
+    },
+    {
+     "l": "Trades per week 10",
+     "d": "9 in the last 7 days",
+     "mark": "Pass"
+    }
+   ],
+   "blocked": true
+  },
+  {
+   "pid": "alex",
+   "symbol": "AAPL",
+   "side": "buy",
+   "qty": 30,
+   "rows": [
+    {
+     "l": "Paper cash",
+     "d": "Cost $8,061 of $7,983 available",
+     "mark": "Blocked"
+    },
+    {
+     "l": "Max position 25%",
+     "d": "AAPL would be 8.1%",
+     "mark": "Pass"
+    },
+    {
+     "l": "Max sector 50%",
+     "d": "Technology would be 69.9%",
+     "mark": "Blocked"
+    },
+    {
+     "l": "Trades per week 10",
+     "d": "9 in the last 7 days",
+     "mark": "Pass"
+    }
+   ],
+   "blocked": true
+  },
+  {
+   "pid": "alex",
+   "symbol": "META",
+   "side": "buy",
+   "qty": 100,
+   "rows": [
+    {
+     "l": "Paper cash",
+     "d": "Cost $71,850 of $7,983 available",
+     "mark": "Blocked"
+    },
+    {
+     "l": "Max position 25%",
+     "d": "META would be 81.9%",
+     "mark": "Blocked"
+    },
+    {
+     "l": "Max sector 50%",
+     "d": "Communication would be 81.9%",
+     "mark": "Blocked"
+    },
+    {
+     "l": "Trades per week 10",
+     "d": "9 in the last 7 days",
+     "mark": "Pass"
+    }
+   ],
+   "blocked": true
+  },
+  {
+   "pid": "alex",
+   "symbol": "AVGO",
+   "side": "sell",
+   "qty": 40,
+   "rows": [
+    {
+     "l": "No shorting (MVP)",
+     "d": "You hold 17 shares and cannot sell 40",
+     "mark": "Blocked"
+    },
+    {
+     "l": "Trades per week 10",
+     "d": "9 in the last 7 days",
+     "mark": "Pass"
+    }
+   ],
+   "blocked": true
+  }
+ ]
+}

@@ -4,7 +4,7 @@ UV ?= uv
 PORT ?= 8000
 export SP_TEST_DB ?= stockpilot_test
 
-.PHONY: help setup test lint fmt run seed openapi migrate audit clean
+.PHONY: help setup test lint fmt run seed openapi migrate audit clean ingest-xbrl ingest-filings
 
 help:
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/'
@@ -37,6 +37,12 @@ run: ## uvicorn on :$(PORT) (override: make run PORT=8001)
 
 seed: ## universe + personas + demo data (BE-04)
 	$(UV) run python -m scripts.seed
+
+ingest-xbrl: ## SEC companyfacts -> xbrl_facts for the universe (live network; BE-11). TICKERS=A,B optional
+	$(UV) run python -m app.modules.edgar.cli ingest-xbrl $(if $(TICKERS),--tickers $(TICKERS),)
+
+ingest-filings: ## latest 10-K + 8-K list -> raw_documents/doc_chunks (live network; BE-12). TICKERS=A,B optional
+	$(UV) run python -m app.modules.research.cli ingest-filings $(if $(TICKERS),--tickers $(TICKERS),)
 
 openapi: ## regenerate docs/contracts/openapi.json
 	$(UV) run python -m scripts.dump_openapi

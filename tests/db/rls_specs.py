@@ -29,6 +29,7 @@ REFERENCE_TABLES = frozenset(
         "prices_daily",
         "corporate_actions",
         "eval_runs",
+        "doc_tables",
     }
 )
 SYSTEM_TABLES = frozenset({"schema_migrations"})
@@ -130,6 +131,7 @@ TABLE_SPECS: dict[str, Spec] = {
     "audit_log": Spec("user_id", lambda c, p: _ins(c, "insert into audit_log (user_id, action, entity) values ($1, 'x', 'y')", p.user_id)),
     "traces": Spec("user_id", lambda c, p: _ins(c, "insert into traces (trace_id, user_id, name) values ($1, $2, 'chat')", uuid4().hex, p.user_id)),
     "trace_steps": Spec("user_id", lambda c, p: _ins(c, "insert into trace_steps (trace_ref, user_id, idx, name) values ($1, $2, 0, 's')", p.trace_ref, p.user_id)),
+    "position_adjustments": Spec("user_id", lambda c, p: _ins(c, "insert into position_adjustments (portfolio_id, user_id, symbol, kind, ex_date, ratio, qty_before, qty_after, avg_cost_before, avg_cost_after) values ($1, $2, 'AAPL', 'split', current_date, 4, 1, 4, 100, 25)", p.portfolio_id, p.user_id)),
     "stream_tokens": Spec("user_id", lambda c, p: _ins(c, "insert into stream_tokens (token_hash, user_id, expires_at) values ($1, $2, now() + interval '1 minute')", uuid4().hex, p.user_id)),
 }  # fmt: skip
 

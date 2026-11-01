@@ -96,13 +96,13 @@ async def test_new_migration_file_applies_alone_and_bad_names_fail(scratch_dsn: 
     work = tmp_path / "migrations"
     shutil.copytree(MIGRATIONS_DIR, work)
     await migrate(scratch_dsn, directory=work)
-    (work / "0100_demo.sql").write_text("create table demo_a (id int primary key);", encoding="utf-8")
-    assert await migrate(scratch_dsn, directory=work) == [100]
+    (work / "0990_demo.sql").write_text("create table demo_a (id int primary key);", encoding="utf-8")
+    assert await migrate(scratch_dsn, directory=work) == [990]
     (work / "oops.sql").write_text("select 1;", encoding="utf-8")
     with pytest.raises(MigrationError, match="bad migration file name"):
         load_migrations(work)
     (work / "oops.sql").unlink()
-    (work / "0100_other.sql").write_text("select 1;", encoding="utf-8")
+    (work / "0990_other.sql").write_text("select 1;", encoding="utf-8")
     with pytest.raises(MigrationError, match="duplicate migration version"):
         load_migrations(work)
 
@@ -111,13 +111,13 @@ async def test_failed_migration_rolls_back_and_is_not_recorded(scratch_dsn: str,
     work = tmp_path / "migrations"
     shutil.copytree(MIGRATIONS_DIR, work)
     await migrate(scratch_dsn, directory=work)
-    (work / "0101_broken.sql").write_text("create table half_done (id int);\nselect 1/0;", encoding="utf-8")
+    (work / "0991_broken.sql").write_text("create table half_done (id int);\nselect 1/0;", encoding="utf-8")
     with pytest.raises(asyncpg.DataError):
         await migrate(scratch_dsn, directory=work)
     conn = await asyncpg.connect(scratch_dsn)
     try:
         assert await conn.fetchval("select to_regclass('public.half_done')") is None
-        assert await conn.fetchval("select count(*) from schema_migrations where version = 101") == 0
+        assert await conn.fetchval("select count(*) from schema_migrations where version = 991") == 0
     finally:
         await conn.close()
 
