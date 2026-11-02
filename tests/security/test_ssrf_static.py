@@ -325,7 +325,12 @@ SECRET_PATTERNS = {
     ),
 }
 #: the only credential-looking constants allowed in the repo: documented DEV defaults
-ALLOWED_LITERALS = ("dev-only-secret-change-me", "stockpilot_dev_pw", "postgres:postgres@")
+ALLOWED_LITERALS = (
+    "dev-only-secret-change-me",
+    "stockpilot_dev_pw",
+    "postgres:postgres@",
+    "SUPERSECRETVALUE-123456",  # deliberate fake in test_input_abuse: proves 422 bodies never echo input
+)
 
 
 def _git(*args: str) -> str:

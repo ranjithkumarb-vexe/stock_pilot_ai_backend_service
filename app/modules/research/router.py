@@ -59,6 +59,18 @@ async def _build_and_store(
         )  # fmt: skip
     rec.set_outcome("ok" if built.status == "ok" else "error")
     await rec.flush()
+    if built.status != "ok":
+        # QA-D2: a model outage must never replace a good cached brief with the degraded safe template. Keep serving the
+        # last verified brief, flagged stale, so the user keeps real content and the next read can retry the model.
+        good = await find_cached(conn, user.user_id, symbol, as_of, built.style.style_hash())
+        if good is not None and good["status"] == "ok":
+            return to_brief_out(
+                {
+                    **good,
+                    "stale": True,
+                    "stale_reason": "The AI model is unavailable; showing the last verified brief.",
+                }
+            )
     row = await save_brief(conn, user.user_id, built, rec.trace_id)
     return to_brief_out(row)
 
@@ -74,8 +86,9 @@ async def get_brief(
     style = await load_style_card(conn, user.user_id)
     await lock_brief_key(conn, user.user_id, sym, as_of, style.style_hash())
     cached = await find_cached(conn, user.user_id, sym, as_of, style.style_hash())
-    if cached is not None:
+    if cached is not None and cached["status"] == "ok":
         return to_brief_out(cached)
+    # nothing cached, or only a degraded brief from an earlier outage: (re)try so the brief recovers with the model
     return await _build_and_store(request, conn, user, clock, llm, sym, as_of)
 
 
