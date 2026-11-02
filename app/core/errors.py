@@ -5,6 +5,7 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Any
 
+import asyncpg
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -181,8 +182,18 @@ async def _unhandled_handler(_request: Request, exc: Exception) -> JSONResponse:
     return internal_error_response()
 
 
+async def _unstorable_text_handler(_request: Request, _exc: Exception) -> JSONResponse:
+    """Postgres refused a string (NUL byte / unsupported escape) that no model validator saw, e.g. a path or query
+    parameter: that is bad input, not a server fault (SEC-07 belt and braces)."""
+    return error_response(
+        422, ErrorCode.VALIDATION_ERROR, "Request contains characters that cannot be stored"
+    )
+
+
 def register_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(AppError, _app_error_handler)
+    app.add_exception_handler(asyncpg.exceptions.CharacterNotInRepertoireError, _unstorable_text_handler)
+    app.add_exception_handler(asyncpg.exceptions.UntranslatableCharacterError, _unstorable_text_handler)
     app.add_exception_handler(StarletteHTTPException, _http_exception_handler)
     app.add_exception_handler(RequestValidationError, _validation_handler)
     app.add_exception_handler(Exception, _unhandled_handler)

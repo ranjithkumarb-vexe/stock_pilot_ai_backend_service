@@ -3,13 +3,19 @@ on:
   push:
     branches: [develop, main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   backend:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     services:
       postgres:
         image: pgvector/pgvector:pg16
@@ -31,6 +37,7 @@ jobs:
           version: "0.13.6"
           enable-cache: true
       - run: uv sync --frozen
+      # same commands as `make lint` / `make test` / `make openapi` / `make audit`
       - name: ruff
         run: |
           uv run ruff check .
@@ -45,3 +52,65 @@ jobs:
           git diff --exit-code docs/contracts/openapi.json
       - name: pip-audit
         run: uv run pip-audit
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
+
+  # Proves the production image: builds, migrates a fresh pgvector database, boots with APP_ENV=prod + AUTH_MODE=supabase
+  # (fake secrets), /readyz is OK, the dev-login route is gone and the container is non-root. First real `docker build` of
+  # this repo happens here (it was never run on the authoring machine: no Docker).
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: docker build
+        run: docker build -t stockpilot-api:ci .
+      - name: image runs as a non-root user
+        run: test "$(docker run --rm stockpilot-api:ci id -u)" != "0"
+      - name: fresh database
+        run: |
+          PGPASSWORD=postgres psql -h localhost -U postgres -c 'create database stockpilot_ci'
+          # prod mode refuses the well-known postgres:postgres admin credentials (SEC-02): use a throw-away admin role
+          PGPASSWORD=postgres psql -h localhost -U postgres -c "create role ci_admin superuser login password 'ci-admin-Pw-7f3a91'"
+      - name: migrate
+        run: |
+          docker run --rm --network host \
+            -e AUTH_MODE=dev \
+            -e DATABASE_ADMIN_URL=postgresql://postgres:postgres@localhost:5432/stockpilot_ci \
+            -e APP_DB_PASSWORD=ci-app-password stockpilot-api:ci python -m app.core.migrate
+      - name: boot in production mode and probe
+        run: |
+          docker run -d --name api --network host -e PORT=8000 \
+            -e APP_ENV=prod -e AUTH_MODE=supabase \
+            -e SUPABASE_JWT_SECRET=ci-fake-secret-ci-fake-secret-ci-fake-secret \
+            -e CORS_ORIGINS=https://example.vercel.app \
+            -e DATABASE_URL=postgresql://stockpilot_app:ci-app-password@localhost:5432/stockpilot_ci \
+            -e DATABASE_ADMIN_URL=postgresql://ci_admin:ci-admin-Pw-7f3a91@localhost:5432/stockpilot_ci \
+            -e JWT_ISSUER=https://ci.supabase.co/auth/v1 -e SEC_USER_AGENT="StockPilot ci@example.com" \
+            -e APP_DB_PASSWORD=ci-app-password -e ALERTS_EDGAR_LIVE=0 \
+            stockpilot-api:ci
+          for i in $(seq 1 30); do curl -fs localhost:8000/readyz && break; sleep 1; done
+          curl -fs localhost:8000/readyz
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST localhost:8000/v1/auth/dev-login -H 'content-type: application/json' -d '{"persona":"priya"}')" = "404"
+          test "$(curl -s -o /dev/null -w '%{http_code}' localhost:8000/docs)" = "404"
+      - name: container logs on failure
+        if: failure()
+        run: docker logs api || true

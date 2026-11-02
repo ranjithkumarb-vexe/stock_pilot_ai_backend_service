@@ -20,7 +20,7 @@ from app.modules.edgar.ratios import (
     ordinal,
     percentile_rank,
 )
-from app.modules.edgar.xbrl import FactSet, load_facts
+from app.modules.edgar.xbrl import ANNUAL_FORMS, FactSet, load_facts
 
 NM = "n/m"
 
@@ -171,7 +171,7 @@ async def peer_stats(
     growth: list[Decimal | None] = []
     margin: list[Decimal | None] = []
     for p in peers:
-        fs = await load_facts(conn, p, as_of=as_of)
+        fs = await load_facts(conn, p, as_of=as_of, forms=ANNUAL_FORMS)
         if len(fs) == 0:
             continue
         lc = await last_close(conn, p, as_of)
@@ -189,7 +189,7 @@ async def build_ledger(
     trow = await conn.fetchrow("select name, sector from tickers where symbol = $1", symbol)
     name = trow["name"] if trow else symbol
     sector = trow["sector"] if trow else None
-    fs = await load_facts(conn, symbol, as_of=as_of)
+    fs = await load_facts(conn, symbol, as_of=as_of, forms=ANNUAL_FORMS)
     price, price_src, freshness = await resolve_price(conn, symbol, as_of, price_source)
     metrics = compute_core_metrics(fs, sector=sector, price=price, as_of=as_of)
     pes, growth, margin = await peer_stats(conn, symbol, sector, as_of)

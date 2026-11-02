@@ -33,7 +33,7 @@ SECTOR_PRIOR = Arm(
     1.0, 1.0
 )  # the shared sector-preference arm starts uninformative: it is learned only from behaviour
 SECTOR_EVIDENCE = (
-    3.0  # pseudo-counts one reward adds to the sector arm (a sector taste is shared by all item types)
+    5.0  # pseudo-counts one reward adds to the sector arm (a sector taste is shared by all item types)
 )
 FORGET = 0.95  # per-update discount of evidence beyond the prior (non-stationary taste, no lock-in)
 

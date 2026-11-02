@@ -1,0 +1,94 @@
+# Local / demo stack: Postgres 16 + pgvector, one-shot migrate, the API, optional demo seed and web preview.
+#   docker compose -f infra/docker-compose.yml up --build                  # db + migrate + api on http://localhost:8000
+#   docker compose -f infra/docker-compose.yml --profile seed run --rm seed  # demo universe + personas (dev auth only)
+#   docker compose -f infra/docker-compose.yml --profile web up --build     # + the web app on http://localhost:5173
+# STATUS: UNVERIFIED - Docker is not installed on the machine this was written on (docs/RELEASE.md). The same steps without
+# Docker were executed: docs/RUNBOOK.md section 9. This is a DEMO stack (AUTH_MODE=dev, simulated data, mock LLM): it is
+# deliberately NOT how production runs: AUTH_MODE=dev lets anyone who can reach :8000 mint a token, and Postgres uses
+# postgres:postgres. Ports are bound to 127.0.0.1 only (SEC-15); NEVER expose this stack on a network or a public host. Override anything through a `.env` file next to this one or the shell.
+name: stockpilot
+
+x-api-env: &api-env
+  APP_ENV: ${APP_ENV:-dev}
+  AUTH_MODE: ${AUTH_MODE:-dev}   # explicit on purpose: the app has no default (SEC-03); this demo stack is dev-auth
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+  DATABASE_URL: postgresql://stockpilot_app:${APP_DB_PASSWORD:-stockpilot_dev_pw}@db:5432/stockpilot
+  DATABASE_ADMIN_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/stockpilot
+  APP_DB_PASSWORD: ${APP_DB_PASSWORD:-stockpilot_dev_pw}
+  DEV_JWT_SECRET: ${DEV_JWT_SECRET:-dev-only-secret-change-me-0123456789abcdef}
+  SUPABASE_URL: ${SUPABASE_URL:-}
+  SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET:-}
+  SUPABASE_JWKS_URL: ${SUPABASE_JWKS_URL:-}
+  JWT_ISSUER: ${JWT_ISSUER:-}
+  LLM_PROVIDER: ${LLM_PROVIDER:-mock}
+  META_MODEL_API_KEY: ${META_MODEL_API_KEY:-}
+  MARKET_DATA_SOURCE: ${MARKET_DATA_SOURCE:-simulated}
+  ALPACA_KEY_ID: ${ALPACA_KEY_ID:-}
+  ALPACA_SECRET: ${ALPACA_SECRET:-}
+  FINNHUB_KEY: ${FINNHUB_KEY:-}
+  SEC_USER_AGENT: ${SEC_USER_AGENT:-StockPilot <your-email>}
+  ALERTS_EDGAR_LIVE: ${ALERTS_EDGAR_LIVE:-0}   # 1 needs a real SEC_USER_AGENT contact
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: stockpilot
+    ports:
+      - "127.0.0.1:${DB_PORT:-5433}:5432"   # 5433 on the host so it never collides with a local Postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d stockpilot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  migrate:
+    build: { context: .., dockerfile: Dockerfile }
+    command: ["python", "-m", "app.core.migrate"]
+    environment: *api-env
+    depends_on:
+      db: { condition: service_healthy }
+    restart: "no"
+
+  api:
+    build: { context: .., dockerfile: Dockerfile }
+    environment: *api-env
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    restart: unless-stopped
+
+  seed:                       # demo personas + simulated price history; never for production (docs/RUNBOOK.md section 6)
+    profiles: ["seed"]
+    build: { context: .., dockerfile: Dockerfile }
+    command: ["python", "-m", "scripts.seed"]
+    environment: *api-env
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    restart: "no"
+
+  web:                        # optional: builds and previews the sibling web repo against this API (dev-login demo accounts)
+    profiles: ["web"]
+    image: node:22-slim
+    working_dir: /web
+    volumes:
+      - ${WEB_DIR:-../../../ReactProjects/stock_pilot_ai_web_app}:/web
+      - web_node_modules:/web/node_modules     # keeps the host's macOS node_modules untouched
+    environment:
+      VITE_API_BASE_URL: http://localhost:${API_PORT:-8000}
+      VITE_AUTH_MODE: dev
+    command: >
+      sh -c "npm ci && npx vite build --outDir /tmp/dist && npx vite preview --outDir /tmp/dist --host 0.0.0.0 --port 5173 --strictPort"
+    ports:
+      - "127.0.0.1:5173:5173"
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
+  web_node_modules:

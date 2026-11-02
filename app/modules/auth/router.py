@@ -58,7 +58,9 @@ async def delete_account(
     settings: SettingsDep,
 ) -> Response:
     del body  # validated: {"confirm": "DELETE"}
-    await service.delete_account(conn, user.user_id)
+    clock: Clock = request.app.state.clock
+    now = clock.now()
+    await service.delete_account(conn, user.user_id, now)
     # CR-3: also remove the Supabase auth user (no-op without SUPABASE_URL + service-role key). It runs
     # before the local transaction commits: if Supabase is down we roll the local delete back (503) and the
     # client can simply retry; deleting an already-deleted auth user is a success (404 is treated as done).
@@ -70,5 +72,5 @@ async def delete_account(
             "Could not finish deleting your sign-in account. Please try again."
         ) from exc
     known: KnownUsers = request.app.state.known_users
-    known.forget(user.user_id)
+    known.mark_deleted(user.user_id, now)
     return Response(status_code=204)

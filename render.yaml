@@ -1,0 +1,69 @@
+# Render Blueprint for the StockPilot AI API (docs/RUNBOOK.md section 5). UNVERIFIED: no Render account was used; validate it
+# with the Render dashboard (New -> Blueprint) or `render blueprints validate render.yaml` before relying on it.
+#
+# Database: NOT created here. The migrations need a role that is a superuser or has BYPASSRLS and the `vector` extension
+# (migration 0001 refuses to run otherwise). Supabase's `postgres` role is the intended fit (SPEC 6.3); Render's managed
+# Postgres gives a plain owner role, which is not documented to satisfy that check - verify before using it instead.
+# Variables marked `sync: false` are prompted for in the dashboard and never stored in git; the full table with where to
+# obtain each value is docs/RUNBOOK.md section 2.
+services:
+  - type: web
+    name: stockpilot-api                  # URL: https://stockpilot-api.onrender.com unless Render appends a suffix. The web
+                                          # app's vercel.json connect-src and VITE_API_BASE_URL must use the REAL URL.
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    branch: main
+    plan: starter                         # do NOT use a free plan: it sleeps after ~15 min idle, which stops the SSE stream, the
+                                          # alert monitor and the queued-order sweeper (all in-process, ADR-004)
+    region: singapore                     # keep it near the Supabase project region (database latency dominates)
+    numInstances: 1                       # MUST stay 1: quote store, SSE fan-out, scheduler and rate limiter are in-process
+    autoDeploy: false                     # promote deliberately: migrate first, then deploy (runbook section 7)
+    healthCheckPath: /readyz              # 200 only when the database answers; /healthz is pure liveness
+    envVars:
+      - { key: APP_ENV, value: prod }
+      - { key: AUTH_MODE, value: supabase }
+      - { key: REQUIRE_MFA, value: "true" }  # API rejects tokens that are not aal2 (TOTP); the SPA already requires it (SEC-04)
+      - { key: LOG_LEVEL, value: INFO }
+      - { key: TRUST_PROXY, value: "true" } # Render's proxy sets X-Forwarded-For; needed for per-IP rate limits
+      - { key: TRUSTED_PROXY_HOPS, value: "1" } # exactly one proxy (Render's) in front: client IP = LAST X-Forwarded-For entry (SEC-08). Add a CDN/WAF in front => 2
+      - { key: PORT, value: "10000" }       # Render's default; the image honours $PORT
+      - { key: CORS_ORIGINS, sync: false }  # exactly the Vercel origin(s), comma separated, https, no trailing slash
+      # database (Supabase)
+      - { key: DATABASE_URL, sync: false }          # role stockpilot_app (RLS enforced), same password as APP_DB_PASSWORD
+      - { key: DATABASE_ADMIN_URL, sync: false }    # owner/BYPASSRLS role: order sweeper + system rows at runtime; migrations
+      - { key: APP_DB_PASSWORD, sync: false }
+      - { key: DB_POOL_MAX, value: "10" }
+      # auth (Supabase)
+      - { key: SUPABASE_URL, sync: false }
+      - { key: SUPABASE_JWKS_URL, sync: false }     # or SUPABASE_JWT_SECRET for HS256 projects (one of the two is required)
+      - { key: SUPABASE_JWT_SECRET, sync: false }
+      - { key: JWT_ISSUER, sync: false }            # https://<ref>.supabase.co/auth/v1 - REQUIRED: the app refuses to boot in prod without it (SEC-18)
+      - { key: JWT_AUDIENCE, value: authenticated }
+      - { key: SUPABASE_SERVICE_ROLE_KEY, sync: false }   # only for DELETE /account (removes the Supabase auth user)
+      # LLM
+      - { key: LLM_PROVIDER, value: mock }          # switch to `meta` after `python -m app.modules.llm.smoke` passes (runbook 4.4)
+      - { key: META_MODEL_API_KEY, sync: false }
+      - { key: META_API_BASE_URL, value: "https://api.meta.ai/v1" }
+      - { key: LLM_BUDGET_ALERT_USD, value: "100" }
+      - { key: LLM_BUDGET_HARD_STOP_USD, value: "140" }
+      - { key: LLM_USER_DAILY_BUDGET_USD, value: "1.00" }
+      - { key: LLM_PRICE_IN_PER_MTOK, value: "1.00" }    # PLACEHOLDER until the provider price list is verified
+      - { key: LLM_PRICE_OUT_PER_MTOK, value: "4.00" }   # PLACEHOLDER
+      # market data / filings
+      - { key: MARKET_DATA_SOURCE, value: simulated }    # alpaca | finnhub after the keys are set and /v1/market/status verified
+      - { key: ALPACA_KEY_ID, sync: false }
+      - { key: ALPACA_SECRET, sync: false }
+      - { key: FINNHUB_KEY, sync: false }
+      - { key: FRED_API_KEY, sync: false }
+      - { key: SEC_USER_AGENT, sync: false }             # "StockPilot you@yourdomain" - SEC requires a real contact
+      - { key: ALERTS_EDGAR_LIVE, value: "1" }
+      # rate limits (defaults shown in .env.example)
+      - { key: RATE_LIMIT_ENABLED, value: "true" }
+      # observability (optional, not wired to a backend yet)
+      - { key: LANGFUSE_PUBLIC_KEY, sync: false }
+      - { key: LANGFUSE_SECRET_KEY, sync: false }
+      - { key: LANGFUSE_HOST, sync: false }
+    # Paid plans only: run migrations as a pre-deploy step instead of from your machine (runbook 3). Needs DATABASE_ADMIN_URL
+    # and APP_DB_PASSWORD, both already set above.
+    # preDeployCommand: python -m app.core.migrate

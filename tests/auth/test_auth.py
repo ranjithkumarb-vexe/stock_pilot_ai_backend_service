@@ -220,7 +220,7 @@ def test_auth_modes_fail_fast_on_bad_config() -> None:
     with pytest.raises(ValueError, match="SUPABASE_JWT_SECRET or SUPABASE_JWKS_URL"):
         Settings(_env_file=None, auth_mode="supabase")
     with pytest.raises(ValueError, match="at least 32 bytes"):
-        Settings(_env_file=None, dev_jwt_secret="short")
+        Settings(_env_file=None, auth_mode="dev", dev_jwt_secret="short")
     with pytest.raises(ValueError, match="CORS_ORIGINS"):
         Settings(
             _env_file=None,

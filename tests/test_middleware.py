@@ -13,7 +13,7 @@ from app.main import create_app
 
 
 def _offline_settings(**kw: Any) -> Settings:
-    return Settings(_env_file=None, database_url="postgresql://x:x@127.0.0.1:1/nope", **kw)
+    return Settings(_env_file=None, auth_mode="dev", database_url="postgresql://x:x@127.0.0.1:1/nope", **kw)
 
 
 async def _client(**kw: Any) -> tuple[Any, httpx.AsyncClient]:
@@ -157,6 +157,27 @@ async def test_user_rate_limit_applies_after_auth(
         assert int(limited.headers["retry-after"]) >= 1
         # another user is unaffected
         assert (await client.get("/v1/me", headers=auth_headers(b))).status_code == 200
+
+
+def test_default_rate_limits_leave_room_for_a_spa_session_and_ip_is_not_tighter_than_user() -> None:
+    """One page load is ~25 API calls: a handful of reloads must not trip the per-user bucket (integration pass 1)."""
+    s = Settings(_env_file=None, auth_mode="dev")
+    assert s.rate_limit_user_burst >= 300 and s.rate_limit_user_per_s >= 30.0
+    # the IP bucket sits in front of the user bucket: a lower IP burst would make the user limit unreachable
+    assert (
+        s.rate_limit_ip_burst >= s.rate_limit_user_burst and s.rate_limit_ip_per_s >= s.rate_limit_user_per_s
+    )
+
+
+async def test_ten_page_reloads_in_a_burst_are_not_rate_limited_with_default_limits(
+    app_factory: Callable[..., Any], make_user: Callable[..., Any], auth_headers: Callable[..., Any]
+) -> None:
+    uid = await make_user()
+    async with app_factory() as client:  # default limiter settings
+        statuses = [
+            (await client.get("/v1/me", headers=auth_headers(uid))).status_code for _ in range(10 * 25)
+        ]
+    assert set(statuses) == {200}
 
 
 async def test_error_responses_keep_cors_headers_so_browsers_can_read_them() -> None:

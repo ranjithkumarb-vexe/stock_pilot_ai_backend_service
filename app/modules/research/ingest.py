@@ -16,11 +16,12 @@ from typing import Any
 
 from app.core.db import Connection, vec_literal
 from app.core.logging import get_logger
+from app.modules.audit.quarantine import BlockedChunk, record_injection_block
 from app.modules.edgar.client import EdgarClient, EdgarError, submissions_url
 from app.modules.edgar.ingest import TickerRef
 from app.modules.research.embedding import EMBEDDING_VERSION, Embedder, HashingEmbedder
 from app.modules.research.filings import FilingRef, parse_submissions, select_filings
-from app.modules.research.injection import Scanner, default_scanner
+from app.modules.research.injection import Scanner, ScanResult, default_scanner
 from app.modules.research.pipeline import ProcessedDocument, process_8k_html, process_10k_html
 
 log = get_logger("app.research.ingest")
@@ -151,6 +152,36 @@ async def _already_ingested(conn: Connection, symbol: str, accession_no: str) ->
     return bool(row and row["chunk_count"] is not None and row["ingest_version"] == INGEST_VERSION)
 
 
+async def _record_blocked(
+    conn: Connection, symbol: str, filing: FilingRef, processed: ProcessedDocument
+) -> None:
+    """CR-19: one system trace per quarantined chunk, right after the chunks are stored (never copies chunk text).
+
+    Tracing must never break ingestion; the audit module's startup backfill covers anything missed here.
+    """
+    blocked = [c for c in processed.chunks if c.quarantined]
+    if not blocked:
+        return
+    rows = await conn.fetch(
+        "select id, item, chunk_no from doc_chunks where symbol = $1 and accession_no = $2 and quarantined",
+        symbol,
+        filing.accession_no,
+    )
+    ids = {(r["item"], r["chunk_no"]): str(r["id"]) for r in rows}
+    for c in blocked:
+        chunk_id = ids.get((c.item, c.chunk_no))
+        if chunk_id is None:
+            continue
+        try:
+            await record_injection_block(
+                BlockedChunk(chunk_id, symbol, filing.form, c.item, filing.accession_no),
+                ScanResult(True, c.score, c.reasons),
+                c.scan_ms,
+            )
+        except Exception:
+            log.exception("injection trace failed", extra={"symbol": symbol, "chunk": chunk_id})
+
+
 async def ingest_filing(
     conn: Connection,
     client: EdgarClient,
@@ -183,6 +214,7 @@ async def ingest_filing(
         fetched_at=fetched.fetched_at,
         processed=processed,
     )
+    await _record_blocked(conn, symbol, filing, processed)
     res.status = "ingested"
     res.chunks = len(processed.chunks)
     res.quarantined = processed.quarantined

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+from datetime import datetime
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -53,6 +54,9 @@ async def dev_login_user(persona: str, email: str | None) -> MeResponse:
         name, persona_id, onboarded = None, None, False
     async with user_tx(user_id) as conn:
         await conn.execute(
+            "select clear_my_tombstone()"
+        )  # dev-login = explicit fresh start (SEC-13, dev only)
+        await conn.execute(
             """
             insert into users (id, email, display_name, persona_id, onboarded_at)
             values ($1, $2, $3, $4, case when $5::boolean then now() end)
@@ -67,12 +71,14 @@ async def dev_login_user(persona: str, email: str | None) -> MeResponse:
         return await fetch_me(conn, user_id)
 
 
-async def delete_account(conn: Connection, user_id: UUID) -> None:
+async def delete_account(conn: Connection, user_id: UUID, now: datetime) -> None:
     """Skeleton account deletion (stream A/BE-05 extends with export hooks and Supabase auth deletion).
 
     1. audit the deletion (keyed by a hash of the id, not the id itself),
     2. delete the `users` row — every user-owned table (incl. embeddings) cascades via FK,
-    3. anonymise the user's remaining audit rows (audit_log has no FK and is append-only).
+    3. anonymise the user's remaining audit rows (audit_log has no FK and is append-only),
+    4. leave a tombstone (hash of the id + `now`, migration 0900) so the still-valid JWT cannot re-provision the account
+       (SEC-13).
     """
     await write_audit(
         conn,
@@ -84,3 +90,4 @@ async def delete_account(conn: Connection, user_id: UUID) -> None:
     )
     await conn.execute("delete from users where id = $1", user_id)
     await conn.fetchval("select anonymize_audit_log($1)", user_id)
+    await conn.execute("select tombstone_my_account($1)", now)

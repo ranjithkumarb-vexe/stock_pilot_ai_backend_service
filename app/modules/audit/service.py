@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
+from app.core.cursors import parse_timestamp_cursor
 from app.core.db import Connection
 from app.core.errors import not_found
 from app.modules.audit.naming import display_name, kind_of, mode_label, step_detail, step_outcome
@@ -49,7 +50,7 @@ async def list_traces(
 ) -> tuple[list[TraceOut], str | None]:
     before: datetime | None = None
     if cursor:
-        before = datetime.fromisoformat(cursor.replace("Z", "+00:00"))
+        before = parse_timestamp_cursor(cursor)
     prefix = None if kind is None else f"{kind}:%"
     args = (before, outcome, prefix, limit + 1)
     where = (

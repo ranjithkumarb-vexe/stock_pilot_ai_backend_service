@@ -32,7 +32,8 @@ REFERENCE_TABLES = frozenset(
         "doc_tables",
     }
 )
-SYSTEM_TABLES = frozenset({"schema_migrations"})
+# deleted_accounts: account tombstones (SEC-13), no user_id column, deny-all RLS, reachable only via SECURITY DEFINER functions
+SYSTEM_TABLES = frozenset({"schema_migrations", "deleted_accounts"})
 
 
 @dataclass(frozen=True)

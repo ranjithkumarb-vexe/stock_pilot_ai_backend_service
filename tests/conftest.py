@@ -40,7 +40,7 @@ Conn = Any
 
 @pytest.fixture(scope="session")
 def settings() -> Settings:
-    base = Settings()
+    base = Settings(auth_mode="dev")  # explicit: AUTH_MODE has no default (SEC-03)
     name = base.sp_test_db
     if not re.search(r"(test|e2e)", name):
         raise RuntimeError(f"refusing to run tests against database {name!r}: SP_TEST_DB must contain 'test'")

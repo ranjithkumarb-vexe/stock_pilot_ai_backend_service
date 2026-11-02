@@ -127,9 +127,14 @@ async def test_personas_match_the_design_exactly(db_admin: Any, seed_p: Any) -> 
         "select count(*) from orders where user_id = $1 and source = 'seed'", uid
     )
     assert n_orders == len(seed_p.orders)  # the design's recent orders, as real fills
-    assert await db_admin.fetchval("select count(*) from alerts where user_id = $1", uid) == len(
-        seed_p.alerts
+    # the design's alert set, plus only what the risk engine adds when the seed runs it (CR-22: Alex's HHI > 0.25)
+    assert await db_admin.fetchval(
+        "select count(*) from alerts where user_id = $1 and payload ? 'seed_id'", uid
+    ) == len(seed_p.alerts)
+    extra = await db_admin.fetch(
+        "select type from alerts where user_id = $1 and not (payload ? 'seed_id')", uid
     )
+    assert {r["type"] for r in extra} <= {"concentration"}
     assert await db_admin.fetchval(
         "select count(*) from events where user_id = $1 and type = 'order_filled'", uid
     ) >= len(seed_p.orders)
@@ -198,3 +203,95 @@ async def test_persona_with_leftover_rows_but_no_portfolio_is_rebuilt_not_crashe
     report = await seed(db_admin, now=seed_now, personas=["alex"])
     assert report.personas == {"alex": "seeded"}
     assert await db_admin.fetchval("select count(*) from positions where user_id = $1", uid) == 6
+
+
+# ------------------------------------------------------------------ CR-22: style card `order` + engine-adopted alerts
+@pytest.mark.parametrize("seed_p", [PRIYA, ALEX, SAM], ids=lambda p: p.key)
+async def test_cr22_seeded_style_card_has_the_order_key_the_brief_generator_reads(
+    db_admin: Any, seed_p: Any
+) -> None:
+    from app.modules.research.brief.style import load_style_card
+
+    uid = PERSONAS[seed_p.key].user_id
+    card = await db_admin.fetchval(
+        "select value from user_features where user_id = $1 and key = 'style_card'", uid
+    )
+    assert card["order"] == card["section_order"] == list(seed_p.section_order)
+    # so BEFORE any recompute_features run, Priya and Alex already get different brief orders
+    assert (await load_style_card(db_admin, uid)).order == list(seed_p.section_order)
+
+
+async def test_cr22_priya_and_alex_get_different_first_brief_sections(db_admin: Any) -> None:
+    from app.modules.research.brief.style import load_style_card
+
+    priya = await load_style_card(db_admin, PERSONAS["priya"].user_id)
+    alex = await load_style_card(db_admin, PERSONAS["alex"].user_id)
+    assert priya.order[0] == "bal" and alex.order[0] == "trend" and priya.style_hash() != alex.style_hash()
+
+
+@pytest.mark.parametrize("seed_p", [PRIYA, ALEX], ids=lambda p: p.key)
+async def test_cr22_seed_adopts_the_design_breach_alerts_with_the_risk_engine_keys(
+    db_admin: Any, seed_p: Any, seed_now: datetime
+) -> None:
+    from app.modules.alerts.seedhook import refresh_for_seed
+
+    uid = PERSONAS[seed_p.key].user_id
+    rows = await db_admin.fetch("select payload from alerts where user_id = $1 and type = 'breach'", uid)
+    assert len(rows) == 2 and all(r["payload"].get("breach_key") for r in rows)
+    # every alert of the design's set is still there (the engine may ADD, never replace)
+    seeded_ids = {
+        r["payload"].get("seed_id")
+        for r in await db_admin.fetch("select payload from alerts where user_id = $1", uid)
+    }
+    assert {a["id"] for a in seed_p.alerts} <= seeded_ids
+    # nothing left for the engine to create: the seed already ran it
+    assert await refresh_for_seed(db_admin, uid, seed_now) == 0
+
+
+# ------------------------------------------------------------------ CR-REL-1: production seed without demo personas
+async def test_universe_only_seed_writes_reference_data_and_no_personas(
+    db_admin: Any, seed_now: datetime
+) -> None:
+    tables = ("users", "portfolios", "fills", "proposals", "alerts", "events", "memories")
+    before = {t: await db_admin.fetchval(f"select count(*) from {t}") for t in tables}
+    report = await seed(db_admin, now=seed_now, personas=[])
+    assert report.personas == {} and report.proposals == {} and report.alerts == {}
+    assert report.tickers >= len(UNIVERSE) + 1 and report.price_rows > 0
+    assert {t: await db_admin.fetchval(f"select count(*) from {t}") for t in tables} == before
+    assert await db_admin.fetchval(
+        "select count(*) from tickers where symbol = any($1::text[])", [t.symbol for t in UNIVERSE]
+    ) == len(UNIVERSE)
+
+
+async def test_universe_only_on_a_database_without_personas_creates_no_users(
+    db_admin: Any, seed_now: datetime
+) -> None:
+    """Fresh-production shape: run the seed inside a transaction that first removes the persona users, then roll back."""
+    from app.core.personas import PERSONAS as P
+
+    ids = [p.user_id for p in P.values()]
+    tr = db_admin.transaction()
+    await tr.start()
+    try:
+        await db_admin.execute("delete from users where id = any($1::uuid[])", ids)
+        assert await db_admin.fetchval("select count(*) from users where id = any($1::uuid[])", ids) == 0
+        report = await seed(db_admin, now=seed_now, personas=[])
+        assert report.personas == {}
+        assert await db_admin.fetchval("select count(*) from users where id = any($1::uuid[])", ids) == 0
+        assert await db_admin.fetchval("select count(*) from prices_daily where source = 'simulated'") > 0
+    finally:
+        await tr.rollback()
+
+
+def test_seed_cli_flags_universe_only_and_personas_none() -> None:
+    from scripts.seed import parse_args, persona_keys
+
+    assert persona_keys(parse_args([])) is None
+    assert persona_keys(parse_args(["--personas", "priya, sam"])) == ["priya", "sam"]
+    assert persona_keys(parse_args(["--universe-only"])) == []
+    assert persona_keys(parse_args(["--personas", "none"])) == []
+    assert persona_keys(parse_args(["--personas", ""])) is None  # the old default behaviour is unchanged
+    with pytest.raises(SystemExit):
+        persona_keys(parse_args(["--universe-only", "--personas", "priya"]))
+    with pytest.raises(SystemExit):
+        persona_keys(parse_args(["--universe-only", "--reset"]))

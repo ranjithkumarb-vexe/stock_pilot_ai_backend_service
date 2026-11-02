@@ -13,7 +13,7 @@ from typing import Any, Literal
 from uuid import UUID
 
 from app.core.db import Connection
-from app.modules.ranking.models import ARM_LABEL, Scored
+from app.modules.ranking.models import ARM_LABEL, Scored, dedupe_rules
 from app.modules.ranking.scoring import W_INTEREST, W_MATERIALITY, W_THOMPSON
 
 Basis = Literal["profile", "behaviour", "cold_start"]
@@ -135,11 +135,7 @@ def build_why(row: Any) -> dict[str, Any]:
     f: dict[str, Any] = row["features_used"] or {}
     arm: dict[str, Any] = row["arm_scores"] or {}
     basis: str = row["basis"] or "profile"
-    rules = [
-        {"rule": str(r.get("rule", "")), "passed": bool(r.get("passed", True))}
-        for r in (row["rules_checked"] or [])
-        if isinstance(r, dict)
-    ]
+    rules = dedupe_rules(row["rules_checked"] or [])  # older audit rows may repeat a rule
     sources = [str(s) for s in (f.get("sources") or [])]
     if f.get("pinned"):
         return {

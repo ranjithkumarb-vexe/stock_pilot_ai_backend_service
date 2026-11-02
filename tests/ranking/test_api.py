@@ -194,3 +194,22 @@ async def test_t_pers_07_two_personas_same_ticker_via_the_brief_api(
         assert why.status_code == 200 and why.json()["top_features"]
     finally:
         await db_admin.execute("delete from xbrl_facts where symbol = 'NVDA'")
+
+
+async def test_why_rules_checked_never_repeats_a_rule(dclient: httpx.AsyncClient, reseed: Any) -> None:
+    """Integration pass 1: proposal items listed each rule twice (the stored checks + the re-validation)."""
+    await reseed("priya", "alex")
+    saw_proposal = False
+    for persona in ("priya", "alex"):
+        h, _ = await login(dclient, persona)
+        page = await get_feed(dclient, h, limit=50)
+        for i in page["items"]:
+            rules = [r["rule"] for r in i["why"]["rules_checked"]]
+            assert len(rules) == len(set(rules)), (persona, i["kind"], rules)
+            if i["kind"] == "proposal":
+                saw_proposal = saw_proposal or bool(rules)  # review proposals carry no trade checks
+                # the same view through GET /why (built from the audit row)
+                w = (await dclient.get(f"/v1/why/proposal/{i['id']}", headers=h)).json()
+                wr = [r["rule"] for r in w["rules_checked"]]
+                assert len(wr) == len(set(wr))
+    assert saw_proposal

@@ -1,0 +1,14 @@
+# gitleaks configuration (CI: gitleaks/gitleaks-action). Extends the default ruleset; only documented dev placeholders are allowed.
+title = "StockPilot gitleaks"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "documented local-development placeholders (never used in production, see docs/RUNBOOK.md)"
+paths = ['''^\.env\.example$''', '''^docs/RELEASE\.md$''']
+regexes = [
+  '''stockpilot_dev_pw''',
+  '''k3y-Rotated-9f2c1a77d0''',  # dummy value in tests/prod_config.py
+  '''dev-only-secret-change-me-[0-9a-f]+''',
+]

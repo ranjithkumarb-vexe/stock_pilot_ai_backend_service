@@ -7,7 +7,7 @@ Values are stored exactly as reported (`numeric`), with provenance `accession_no
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Sequence
+from collections.abc import Collection, Iterable, Sequence
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
@@ -172,13 +172,26 @@ async def store_facts(conn: Connection, symbol: str, facts: Sequence[Fact], batc
     return inserted
 
 
-async def load_facts(conn: Connection, symbol: str, *, as_of: date | None = None) -> FactSet:
-    """Read a ticker's facts (optionally only those filed on/before `as_of`)."""
+async def load_facts(
+    conn: Connection,
+    symbol: str,
+    *,
+    as_of: date | None = None,
+    forms: Collection[str] | None = None,
+) -> FactSet:
+    """Read a ticker's facts (optionally only those filed on/before `as_of`, and only from the given `forms`).
+
+    `companyfacts` also carries facts tagged to proxy statements (DEF 14A) and quarterly reports; "latest filing
+    wins" lets a rounded proxy restatement replace the 10-K value (CR-17), so annual consumers pass
+    `forms=ANNUAL_FORMS`.
+    """
     rows = await conn.fetch(
         "select concept, unit, period_start, period_end, fy, fp, value, accession_no, form, filed_at "
-        "from xbrl_facts where symbol = $1 and ($2::date is null or filed_at::date <= $2::date)",
+        "from xbrl_facts where symbol = $1 and ($2::date is null or filed_at::date <= $2::date) "
+        "and ($3::text[] is null or form = any($3::text[]))",
         symbol,
         as_of,
+        sorted(forms) if forms is not None else None,
     )
     return FactSet(
         Fact(

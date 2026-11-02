@@ -447,6 +447,7 @@ def filing_text_answer(picked: list[tuple[RetrievedChunk, str, int]], names: dic
             cites.append(
                 {
                     "id": f"chunk:{ch.id}",
+                    "citation_id": ch.id,  # uuid: `GET /v1/citations/{citation_id}` opens the source drawer
                     "kind": "chunk",
                     "n": by_chunk[ch.id],
                     "chunk_id": ch.id,

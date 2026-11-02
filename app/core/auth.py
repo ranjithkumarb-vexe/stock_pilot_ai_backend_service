@@ -35,6 +35,8 @@ _JWKS_REFETCH_COOLDOWN_S = 30.0
 class AuthUser:
     user_id: UUID
     email: str | None
+    #: token `iat` (epoch seconds, fractional for dev tokens); None when the token carries none
+    issued_at: float | None = None
 
 
 def issue_dev_token(
@@ -52,7 +54,8 @@ def issue_dev_token(
         "aud": settings.jwt_audience,
         "iss": DEV_ISSUER,
         "role": "authenticated",
-        "iat": int(now.timestamp()),
+        "aal": "aal2",  # dev tokens count as MFA-complete so REQUIRE_MFA=true works in dev too
+        "iat": now.timestamp(),  # fractional on purpose: orders a fresh login after an account deletion (SEC-13)
         "exp": int((now + timedelta(seconds=ttl)).timestamp()),
     }
     if email:
@@ -90,8 +93,16 @@ class TokenVerifier:
             user_id = UUID(str(claims["sub"]))
         except (KeyError, ValueError):
             raise unauthenticated("Invalid token subject") from None
+        if self.s.require_mfa and claims.get("aal") != "aal2":
+            # SEC-04: Supabase stamps `aal` (aal1 = password/OAuth only, aal2 = TOTP verified). The SPA gates on it,
+            # the API must too, or a stolen/aal1 token of an MFA-enrolled user would have full access.
+            raise unauthenticated("Multi-factor authentication required")
         email = claims.get("email")
-        return AuthUser(user_id=user_id, email=email if isinstance(email, str) and email else None)
+        iat = claims.get("iat")
+        issued_at = float(iat) if isinstance(iat, (int, float)) and not isinstance(iat, bool) else None
+        return AuthUser(
+            user_id=user_id, email=email if isinstance(email, str) and email else None, issued_at=issued_at
+        )
 
     # ------------------------------------------------------------------
     async def _decode(self, token: str) -> dict[str, Any]:

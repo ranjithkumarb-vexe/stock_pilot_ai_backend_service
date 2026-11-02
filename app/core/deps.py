@@ -62,6 +62,24 @@ async def get_current_user(request: Request) -> AuthUser:
     return user
 
 
+async def expensive_rate_limit(
+    request: Request, user: Annotated[AuthUser, Depends(get_current_user)]
+) -> None:
+    """Extra per-user bucket for endpoints that can spend LLM budget (SEC-17). Add with `dependencies=[ExpensiveCall]`."""
+    limiter: TokenBucketLimiter | None = request.app.state.expensive_limiter
+    if limiter is None:
+        return
+    wait = limiter.check(f"expensive:{user.user_id}")
+    if wait > 0:
+        retry = max(1, math.ceil(wait))
+        raise AppError(
+            ErrorCode.RATE_LIMITED,
+            "Too many requests for this action, slow down",
+            details={"retry_after_s": retry},
+            headers={"Retry-After": str(retry)},
+        )
+
+
 async def user_conn(
     user: Annotated[AuthUser, Depends(get_current_user)],
 ) -> AsyncIterator[Connection]:
@@ -70,8 +88,17 @@ async def user_conn(
 
 
 CurrentUser = Annotated[AuthUser, Depends(get_current_user)]
+ExpensiveCall = Depends(expensive_rate_limit)
 UserConn = Annotated[Connection, Depends(user_conn, scope="function")]
 SettingsDep = Annotated[Settings, Depends(get_settings_dep)]
 ClockDep = Annotated[Clock, Depends(get_clock)]
 
-__all__ = ["ClockDep", "CurrentUser", "SettingsDep", "UserConn", "get_clock", "get_current_user"]
+__all__ = [
+    "ClockDep",
+    "CurrentUser",
+    "ExpensiveCall",
+    "SettingsDep",
+    "UserConn",
+    "get_clock",
+    "get_current_user",
+]

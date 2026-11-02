@@ -12,3 +12,12 @@ __pycache__
 tests
 docs
 .claude
+**/__pycache__
+node_modules
+infra
+htmlcov
+coverage.xml
+.github
+
+# partial eval runs must never ship (CR-REL-3)
+evals/results/latest.fast.json

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import datetime
 from decimal import Decimal
@@ -49,6 +50,20 @@ class TradeSpec:
     side: Literal["buy", "sell"]
     qty: Decimal
     sector: str | None = None
+
+
+def dedupe_rules(rules: Iterable[Any]) -> list[dict[str, Any]]:
+    """`[{rule, passed}]` with each rule label once (first position; a failed check wins over a passed one)."""
+    out: dict[str, dict[str, Any]] = {}
+    for r in rules:
+        if not isinstance(r, dict):
+            continue
+        label, passed = str(r.get("rule", "")), bool(r.get("passed", True))
+        if label in out:
+            out[label]["passed"] = out[label]["passed"] and passed
+        else:
+            out[label] = {"rule": label, "passed": passed}
+    return list(out.values())
 
 
 @dataclass(slots=True)

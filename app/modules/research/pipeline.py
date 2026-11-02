@@ -5,6 +5,7 @@ Quarantined chunks (scanner flagged) are kept for audit but get no embedding and
 
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass, field
 
 from app.modules.research.chunking import chunk_text
@@ -25,6 +26,8 @@ class ProcessedChunk:
     anchor: str
     quarantined: bool
     reasons: tuple[str, ...] = ()
+    score: float = 0.0
+    scan_ms: int = 0
     embedding: list[float] | None = None
 
 
@@ -62,7 +65,9 @@ def _chunks_for(
     kwargs = {"target_tokens": target_tokens} if target_tokens else {}
     out: list[ProcessedChunk] = []
     for ch in chunk_text(text, **kwargs):
+        t0 = time.perf_counter()
         verdict = scanner.scan(ch.text)
+        scan_ms = int((time.perf_counter() - t0) * 1000)
         out.append(
             ProcessedChunk(
                 item=item,
@@ -72,6 +77,8 @@ def _chunks_for(
                 anchor=f"item-{item.lower()}-{ch.chunk_no}",
                 quarantined=verdict.flagged,
                 reasons=verdict.reasons,
+                score=verdict.score,
+                scan_ms=scan_ms,
                 embedding=None if verdict.flagged else embedder.embed(ch.text),
             )
         )

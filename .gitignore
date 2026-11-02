@@ -26,3 +26,6 @@ dist/
 # local artefacts
 *.log
 /tmp/
+
+# partial eval runs (python -m evals.run --fast)
+evals/results/latest.fast.json

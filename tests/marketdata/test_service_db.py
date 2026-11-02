@@ -108,7 +108,7 @@ def test_config_reads_env_knobs() -> None:
     from app.core.config import Settings
 
     cfg = MarketDataConfig.from_settings(
-        Settings(),
+        Settings(auth_mode="dev"),
         {
             "MARKETDATA_SIM_SEED": "7",
             "MARKETDATA_SIM_TICK_S": "0.5",

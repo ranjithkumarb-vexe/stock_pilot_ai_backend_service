@@ -19,6 +19,7 @@ from app.core.pricesource import PriceSource, Quote, QuoteUnavailableError, Stat
 from app.core.ratelimit import TokenBucketLimiter
 from app.core.schemas import Money, Pct, Price
 from app.main import create_app, discover_modules
+from tests.prod_config import prod_kwargs
 
 
 async def test_fake_clock_advances_wall_and_monotonic_time() -> None:
@@ -95,21 +96,21 @@ def test_vec_literal() -> None:
 
 
 def test_cors_origins_parse_from_env_string() -> None:
-    s = Settings(_env_file=None, cors_origins="http://a.test, http://b.test ,")
+    s = Settings(_env_file=None, auth_mode="dev", cors_origins="http://a.test, http://b.test ,")
     assert s.cors_origins == ["http://a.test", "http://b.test"]
-    assert Settings(_env_file=None).docs_enabled is True
+    assert Settings(_env_file=None, auth_mode="dev").docs_enabled is True
 
 
 def test_module_auto_discovery_mounts_health_and_auth() -> None:
     names = [n for n, _ in discover_modules()]
     assert {"health", "auth"} <= set(names)
-    app = create_app(Settings(_env_file=None))
+    app = create_app(Settings(_env_file=None, auth_mode="dev"))
     paths = set(app.openapi()["paths"])
     assert {"/healthz", "/readyz", "/v1/me", "/v1/auth/dev-login", "/v1/stream/token", "/v1/account"} <= paths
 
 
 def test_prod_hides_docs() -> None:
-    s = Settings(_env_file=None, app_env="prod", auth_mode="supabase", supabase_jwt_secret="x" * 40)
+    s = Settings(**prod_kwargs())
     app: FastAPI = create_app(s)
     assert app.openapi_url is None and app.docs_url is None
 

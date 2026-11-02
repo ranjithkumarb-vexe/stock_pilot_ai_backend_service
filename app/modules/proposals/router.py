@@ -8,7 +8,7 @@ from uuid import UUID
 from fastapi import APIRouter, Query
 from pydantic import model_validator
 
-from app.core.deps import ClockDep, CurrentUser, UserConn
+from app.core.deps import ClockDep, CurrentUser, ExpensiveCall, UserConn
 from app.core.schemas import ApiModel
 from app.modules.paper.context import EngineCtx
 from app.modules.paper.hooks import register_after_trade
@@ -34,7 +34,11 @@ class DecisionBody(ApiModel):
         return self
 
 
-@router.post("/proposals/refresh", summary="Generate / expire proposals from the risk engine (idempotent)")
+@router.post(
+    "/proposals/refresh",
+    summary="Generate / expire proposals from the risk engine (idempotent)",
+    dependencies=[ExpensiveCall],
+)
 async def refresh(user: CurrentUser, conn: UserConn, ctx: EngineCtx) -> dict[str, Any]:
     return await service.refresh(conn, user.user_id, ctx)
 

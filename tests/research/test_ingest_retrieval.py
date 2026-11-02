@@ -163,6 +163,50 @@ async def test_injected_chunk_is_quarantined_not_embedded_and_never_retrieved(
     assert hits and all("IGNORE ALL PREVIOUS" not in h.text for h in hits)
 
 
+async def test_cr19_ingest_records_an_injection_block_for_every_quarantined_chunk(
+    acme: Any, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Right after a chunk is quarantined the audit hook is called with the stored chunk's id (no chunk text)."""
+    import app.modules.research.ingest as ingest_mod
+    from app.modules.audit.quarantine import BlockedChunk
+    from app.modules.research.injection import ScanResult
+
+    calls: list[tuple[BlockedChunk, ScanResult, int]] = []
+
+    async def fake(chunk: BlockedChunk, scan: ScanResult, scan_ms: int = 0) -> str | None:
+        # the chunk is already persisted (same transaction) when the hook runs
+        assert await acme.fetchval("select quarantined from doc_chunks where id = $1::uuid", chunk.chunk_id)
+        calls.append((chunk, scan, scan_ms))
+        return None
+
+    monkeypatch.setattr(ingest_mod, "record_injection_block", fake)
+    async with make_client(tmp_path, make_handler(inject_in="k26.htm")) as client:
+        res = await ingest_ticker(acme, client, TickerRef("ACME", CIK), n_10k=1, n_8k=1)
+    rows = await acme.fetch(
+        "select id, item, form, accession_no from doc_chunks where quarantined and symbol='ACME'"
+    )
+    assert res.documents[0].quarantined == len(rows) >= 1 and len(calls) == len(rows)
+    assert {c.chunk_id for c, _, _ in calls} == {str(r["id"]) for r in rows}
+    for chunk, scan, ms in calls:
+        assert (chunk.symbol, chunk.form, chunk.accession_no) == ("ACME", "10-K", "0009990-26-000003")
+        assert chunk.item in ("1A", "1", "7", "7A") and scan.flagged and scan.score > 0 and scan.reasons
+        assert ms >= 0 and not hasattr(chunk, "text")
+
+    # a clean re-ingest of the same company records nothing and a failing hook never breaks ingestion
+    calls.clear()
+    async with make_client(tmp_path / "clean", make_handler()) as client:  # separate HTTP cache dir
+        await ingest_ticker(acme, client, TickerRef("ACME", CIK), n_10k=1, n_8k=0, force=True)
+    assert calls == []
+
+    async def boom(*_a: Any, **_k: Any) -> str | None:
+        raise RuntimeError("tracing down")
+
+    monkeypatch.setattr(ingest_mod, "record_injection_block", boom)
+    async with make_client(tmp_path / "again", make_handler(inject_in="k26.htm")) as client:
+        res2 = await ingest_ticker(acme, client, TickerRef("ACME", CIK), n_10k=1, n_8k=0, force=True)
+    assert res2.documents[0].status == "ingested" and res2.documents[0].quarantined >= 1
+
+
 async def test_t_rag_06_as_of_guard_never_returns_future_filings(acme: Any, tmp_path: Path) -> None:
     async with make_client(tmp_path, make_handler()) as client:
         await ingest_ticker(acme, client, TickerRef("ACME", CIK), n_10k=3, n_8k=2)

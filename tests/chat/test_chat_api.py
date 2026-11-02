@@ -52,7 +52,7 @@ async def test_refusals_at_least_90_percent_and_benign_prompts_answered(
 ) -> None:
     prompts = jl("refusal_prompts.jsonl")
     refuse = [p for p in prompts if p["expect"] == "refuse"]
-    assert len(refuse) == 20
+    assert len(refuse) >= 20  # SPEC 20-prompt set plus the SEC-10/11 obfuscation and paraphrase cases
     ok_refused = 0
     for p in refuse:
         res = await ask(tclient, priya, p["text"])
@@ -193,6 +193,37 @@ async def test_filing_text_answer_quotes_retrieved_sentences_with_chunk_citation
             and c["item"] in ("1A", "1", "7", "7A")
         )
     assert "[1]" in res["answer"]
+
+
+async def test_cr18_chat_chunk_citations_open_in_the_citation_drawer_endpoint(
+    tclient: httpx.AsyncClient, priya: dict[str, str], company: str, db_admin: Any
+) -> None:
+    """The web drawer reads `citation_id` (a uuid) and calls `GET /v1/citations/{id}`; chunk uuids must resolve."""
+    res = await ask(tclient, priya, f"What does {SYM} say about its suppliers?")
+    assert res["citations"]
+    for c in res["citations"]:
+        assert c["citation_id"] == c["chunk_id"] and c["id"] == f"chunk:{c['chunk_id']}"
+        r = await tclient.get(f"/v1/citations/{c['citation_id']}", headers=priya)
+        assert r.status_code == 200, r.text
+        body = r.json()
+        assert body["kind"] == "chunk" and body["id"] == c["chunk_id"]
+        assert body["accession_no"] == c["accession_no"] and body["url"].startswith("https://www.sec.gov/")
+        assert len(body["sha256"]) == 64 and body["company"].startswith("Zenith")
+        assert " ".join(c["excerpt"].split()) in " ".join(body["excerpt"].split())
+        # reference data only: nothing about the user
+        assert set(body) == {"id", "kind", "title", "company", "doc_label", "accession_no", "filed_at",
+                             "fetched_at", "sha256", "url", "excerpt", "rows"}  # fmt: skip
+    # unknown uuid and a quarantined chunk are 404 (quarantined text is never served)
+    assert (
+        await tclient.get("/v1/citations/00000000-0000-4000-8000-000000000000", headers=priya)
+    ).status_code == 404
+    cid = res["citations"][0]["chunk_id"]
+    await db_admin.execute("update doc_chunks set quarantined = true where id = $1::uuid", cid)
+    try:
+        assert (await tclient.get(f"/v1/citations/{cid}", headers=priya)).status_code == 404
+    finally:
+        await db_admin.execute("update doc_chunks set quarantined = false where id = $1::uuid", cid)
+    assert (await tclient.get(f"/v1/citations/{cid}")).status_code == 401
 
 
 @pytest.mark.parametrize(

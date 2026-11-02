@@ -24,6 +24,12 @@ curl -s -X POST localhost:8000/v1/auth/dev-login -H 'content-type: application/j
 curl -s localhost:8000/v1/me -H "Authorization: Bearer <access_token>"
 ```
 
+## Deploy and release
+`docs/RUNBOOK.md` (prerequisites, env/secrets table, first deploy on Supabase + Render + Vercel, migrations/backup/rollback, monitoring,
+cost controls, incident basics, beta test script), `docs/RELEASE.md` (gate table, owner checklist, unverified items, known defects),
+`Dockerfile`, `render.yaml`, `infra/docker-compose.yml`. `make prod-check` boots the API in production mode (no Docker) and probes it;
+`make docker-build` / `make compose-up` need Docker (never run on the authoring machine).
+
 ## Layout
 
 ```
@@ -39,5 +45,5 @@ tests/                 conftest fixtures (db_admin, db_as_user, app_client, make
 
 The API connects as the non-superuser role `stockpilot_app`; every user table has FORCED row-level security keyed on
 `app.user_id`, which `user_tx(user_id)` sets per transaction. The owner/admin URL is only for migrations, seeding and
-background jobs (`system_tx`). `AUTH_MODE=dev` (local only; refused when `APP_ENV=prod`) issues dev JWTs; `supabase` verifies
+background jobs (`system_tx`). `AUTH_MODE` has no default (unset = start-up error outside prod, `supabase` in prod); `dev` (local only; refused when `APP_ENV=prod`; `.env.example` and `make` set it) issues dev JWTs; `supabase` verifies
 Supabase JWTs. The deployment must set `APP_DB_PASSWORD` (the dev default `stockpilot_dev_pw` is for local use only).

@@ -43,7 +43,8 @@ select = ["E", "F", "I", "UP", "B", "ASYNC", "S", "SIM", "RUF", "C4", "PT"]
 ignore = ["S101", "RUF012", "PT018", "PT012", "ASYNC109", "E501"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S105", "S106", "S608", "S311"]
+"tests/**" = ["S105", "S106", "S608", "S311", "RUF001"]  # RUF001: homoglyph / obfuscation test data is the point
+"app/core/textnorm.py" = ["RUF001"]  # the confusables table is literally Cyrillic/Greek look-alike letters
 "scripts/**" = ["S608"]
 "app/core/migrate.py" = ["S608"]
 

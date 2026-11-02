@@ -569,9 +569,11 @@ async def test_supabase_admin_delete_uses_service_key_and_tolerates_404() -> Non
     from app.modules.profile.supabase_admin import configured, delete_auth_user
 
     uid = PERSONAS["priya"].user_id
-    unconfigured = Settings(supabase_url="", supabase_service_role_key="")
+    unconfigured = Settings(auth_mode="dev", supabase_url="", supabase_service_role_key="")
     assert not configured(unconfigured) and await delete_auth_user(unconfigured, uid) is False
-    s = Settings(supabase_url="https://proj.supabase.co", supabase_service_role_key="svc-key")
+    s = Settings(
+        auth_mode="dev", supabase_url="https://proj.supabase.co", supabase_service_role_key="svc-key"
+    )
     with respx.mock(assert_all_called=True) as mock:
         route = mock.delete(f"https://proj.supabase.co/auth/v1/admin/users/{uid}").respond(204)
         assert await delete_auth_user(s, uid) is True

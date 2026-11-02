@@ -13,7 +13,7 @@ from app.modules.chat.ledger import ChatLedger
 from app.modules.chat.symbols import Company
 from app.modules.edgar import ratios as r
 from app.modules.edgar.client import companyfacts_url
-from app.modules.edgar.xbrl import ANNUAL_FORMS, Fact, FactSet
+from app.modules.edgar.xbrl import ANNUAL_FORMS, Fact, FactSet, load_facts
 from app.modules.research.brief.ledger import display_for, fmt_money, resolve_price
 
 #: key -> (label, matching phrases). Order matters: the first metric whose phrase matches is picked first.
@@ -69,20 +69,7 @@ async def load_annual_facts(conn: Connection, symbol: str, as_of: date) -> FactS
     "latest filing wins" a proxy restatement can replace the 10-K value with a rounded one (seen live: JPM net
     income 57,000,000,000 from a DEF 14A vs 57,048,000,000 in the 10-K), so chat answers read 10-K facts only.
     """
-    rows = await conn.fetch(
-        "select concept, unit, period_start, period_end, fy, fp, value, accession_no, form, filed_at from xbrl_facts "
-        "where symbol = $1 and form = any($2::text[]) and filed_at::date <= $3",
-        symbol,
-        sorted(ANNUAL_FORMS),
-        as_of,
-    )
-    return FactSet(
-        Fact(
-            r["concept"], r["unit"], r["period_start"], r["period_end"], r["value"], r["fy"], r["fp"],
-            r["accession_no"], r["form"], r["filed_at"],
-        )
-        for r in rows
-    )  # fmt: skip
+    return await load_facts(conn, symbol, as_of=as_of, forms=ANNUAL_FORMS)
 
 
 def metrics_in(message: str) -> list[str]:

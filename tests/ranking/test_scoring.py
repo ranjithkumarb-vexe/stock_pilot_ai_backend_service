@@ -83,8 +83,8 @@ def test_updated_arms_touch_type_and_sector_context() -> None:
     assert set(out) == {("filing", ""), ("sector", "sector:Technology")}
     assert out[("filing", "")].alpha == pytest.approx(4.0)
     assert out[("sector", "sector:Technology")].alpha == pytest.approx(
-        1.0 + 3.0
-    )  # Beta(1,1) + 3 pseudo-counts
+        1.0 + 5.0
+    )  # Beta(1,1) + 5 pseudo-counts
     assert set(updated_arms({}, priors, "filing", None, 0.0)) == {("filing", "")}
 
 

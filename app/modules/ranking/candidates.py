@@ -28,7 +28,7 @@ from app.modules.ranking.briefing import (
     briefing_id,
     build_briefing,
 )
-from app.modules.ranking.models import Candidate, TradeSpec
+from app.modules.ranking.models import Candidate, TradeSpec, dedupe_rules
 from app.modules.risk import Portfolio, TradeProposal, compute_metrics, current_violations, validate
 
 log = get_logger("app.ranking.candidates")
@@ -127,11 +127,7 @@ def proposal_candidate(r: Any) -> Candidate:
     side, qty = pl.get("side"), pl.get("suggested_qty") or 0
     if r["type"] == "trade" and side in ("buy", "sell") and r["symbol"] and Decimal(str(qty)) > 0:
         trade = TradeSpec(r["symbol"], side, Decimal(str(qty)), r["sector"])
-    checked = [
-        {"rule": str(c.get("rule", "")), "passed": bool(c.get("passed", True))}
-        for c in (r["rules_checked"] or [])
-        if isinstance(c, dict)
-    ]
+    checked = dedupe_rules(r["rules_checked"] or [])
     return Candidate(
         kind="proposal",
         id=str(r["id"]),
@@ -322,10 +318,9 @@ async def _risk_veto(
         Portfolio(state.cash, state.to_risk().positions, state.trades_7d),
         state.rules,
     )
-    c.rules_checked = [
-        *c.rules_checked,
-        *({"rule": ch.label, "passed": ch.ok} for ch in result.checks),
-    ]
+    c.rules_checked = dedupe_rules(
+        [*c.rules_checked, *({"rule": ch.label, "passed": ch.ok} for ch in result.checks)]
+    )
     if not result.allowed:
         first = result.violations[0] if result.violations else None
         return f"risk:{first.rule if first else 'blocked'}"

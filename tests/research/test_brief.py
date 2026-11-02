@@ -501,3 +501,51 @@ async def test_api_concurrent_first_requests_do_not_collide(
         rs = await asyncio.gather(*(c.get("/v1/briefs/KO", headers=h) for _ in range(4)))
         assert [r.status_code for r in rs] == [200, 200, 200, 200], [r.text[:200] for r in rs]
         assert len({r.json()["id"] for r in rs}) == 1
+
+
+# ------------------------------------------------------------------ CR-17: annual facts come from the 10-K family only
+async def _insert_proxy_and_quarter_facts(conn: Any) -> None:
+    """JPM facts as seen live: a DEF 14A restating FY2025 with rounded values, filed AFTER the 10-K, plus a 10-Q."""
+    rows = [
+        ("us-gaap:NetIncomeLoss", "USD", date(2025, 1, 1), date(2025, 12, 31), "57000000000"),
+        ("us-gaap:Revenues", "USD", date(2025, 1, 1), date(2025, 12, 31), "1"),
+        ("us-gaap:EarningsPerShareDiluted", "USD/shares", date(2025, 1, 1), date(2025, 12, 31), "1"),
+    ]
+    for concept, unit, start, end, val in rows:
+        await conn.execute(
+            "insert into xbrl_facts (symbol, concept, unit, period_start, period_end, fy, fp, value, accession_no, "
+            "form, filed_at) values ('JPM', $1, $2, $3, $4, 2025, 'FY', $5::numeric, '0000019617-26-000096', "
+            "'DEF 14A', '2026-04-03T00:00:00Z')",
+            concept, unit, start, end, val,
+        )  # fmt: skip
+    # a later 10-Q reporting a 12-month-looking duration for the same period end must not win either
+    await conn.execute(
+        "insert into xbrl_facts (symbol, concept, unit, period_start, period_end, fy, fp, value, accession_no, form, "
+        "filed_at) values ('JPM', 'us-gaap:NetIncomeLoss', 'USD', '2025-01-01', '2025-12-31', 2026, 'Q1', "
+        "56000000000, '0000019617-26-000200', '10-Q', '2026-05-01T00:00:00Z')"
+    )
+
+
+async def test_cr17_brief_facts_ignore_proxy_and_quarterly_filings(golden: Any) -> None:
+    """JPM FY2025 net income is 57,048,000,000 (10-K 0001628280-26-008131), not the DEF 14A's 57,000,000,000."""
+    await _insert_proxy_and_quarter_facts(golden)
+    ledger, fs = await build_ledger(golden, "JPM", AS_OF, None)
+    ni = fs.latest(r.NET_INCOME, kind="annual", as_of=AS_OF, unit="USD")
+    assert ni is not None
+    assert ni.value == Decimal("57048000000")
+    assert ni.accession_no == "0001628280-26-008131" and ni.form == "10-K"
+    # the figures printed in the brief come from the same 10-K facts
+    qa = {(q["symbol"], q["metric"]): q for q in load_jsonl("numeric_qa.jsonl")}
+    rev = ledger.by_key("revenue")
+    assert rev.value == Decimal(str(qa[("JPM", "revenue")]["answer"]))
+    assert rev.accession_nos == (qa[("JPM", "revenue")]["accession_no"],)
+    assert "0000019617-26-000096" not in {a for e in ledger.entries.values() for a in e.accession_nos}
+    assert ledger.by_key("eps_diluted").accession_nos != ("0000019617-26-000096",)
+
+
+async def test_cr17_peer_stats_ignore_proxy_facts(golden: Any) -> None:
+    from app.modules.research.brief.ledger import peer_stats
+
+    before = await peer_stats(golden, "JPM", "Financials", AS_OF)
+    await _insert_proxy_and_quarter_facts(golden)
+    assert await peer_stats(golden, "JPM", "Financials", AS_OF) == before

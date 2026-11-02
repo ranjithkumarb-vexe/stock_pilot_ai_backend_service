@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from typing import Any
 from uuid import UUID
 
+from app.core.cursors import parse_timestamp_cursor
 from app.core.db import Connection
 from app.core.errors import not_found
 from app.modules.chat.schemas import HistoryItem
@@ -75,6 +76,9 @@ async def history(
 
     `cursor` = created_at of the oldest message already seen (ISO); the next page is the messages before it.
     """
+    before = (
+        parse_timestamp_cursor(cursor) if cursor else None
+    )  # validate first: a bad cursor is a 422 even for an empty history
     if thread_id is None:
         thread_id = await conn.fetchval(
             "select id from chat_threads where user_id = $1 order by updated_at desc, created_at desc limit 1",
@@ -87,7 +91,6 @@ async def history(
         is None
     ):
         raise not_found("Thread not found")
-    before = datetime.fromisoformat(cursor.replace("Z", "+00:00")) if cursor else None
     rows = await conn.fetch(
         "select id, thread_id, role, content, created_at, refused, refusal_reason, citations, trace_id "
         "from chat_messages where thread_id = $1 and user_id = $2 and ($3::timestamptz is null or created_at < $3) "

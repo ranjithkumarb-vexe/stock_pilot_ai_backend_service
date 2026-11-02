@@ -66,6 +66,7 @@ class SeedReport:
     price_rows: int = 0
     personas: dict[str, str] = field(default_factory=dict)  # key -> seeded | skipped
     proposals: dict[str, int] = field(default_factory=dict)
+    alerts: dict[str, int] = field(default_factory=dict)  # alerts the engine ADDED to the design's set
     as_of: str = ""
 
 
@@ -345,6 +346,9 @@ async def _seed_personalization(
         "depth": p.depth, "jargon": p.jargon, "tone": p.tone, "metric": p.metric, "language": p.language,
         "section_order": list(p.section_order), "length": "medium", "quant_vs_narrative": 0.5,
     }  # fmt: skip
+    style["order"] = list(
+        p.section_order
+    )  # the key the brief generator reads (CR-22); same list as `section_order`
     feats: list[tuple[str, dict[str, Any], float, int | None]] = [
         ("style_card", style, 0.8, None),
         ("revealed_tier", {"value": p.revealed_tier}, 0.7, 30),
@@ -435,10 +439,11 @@ async def seed(
     reset: bool = False,
     personas: list[str] | None = None,
     refresh_proposals: bool = True,
+    refresh_alerts: bool = True,
 ) -> SeedReport:
     """Seed inside the caller's connection. Wrapped in one transaction so a failure leaves nothing half-done."""
     now = now or datetime.now(UTC)
-    keys = personas or list(PERSONA_SEEDS)
+    keys = list(PERSONA_SEEDS) if personas is None else personas  # [] = universe + prices only (production)
     unknown = set(keys) - set(PERSONA_SEEDS)
     if unknown:
         raise ValueError(f"unknown persona(s): {sorted(unknown)}")
@@ -456,29 +461,67 @@ async def seed(
             for key in keys:
                 if report.personas[key] == "seeded":
                     report.proposals[key] = await refresh_for_seed(conn, PERSONAS[key].user_id, now)
+        if refresh_alerts:
+            # adopts the design's breach alerts with the risk engine's breach keys (no duplicates later) (CR-22)
+            from app.modules.alerts.seedhook import refresh_for_seed as refresh_alerts_for_seed
+
+            for key in keys:
+                if report.personas[key] == "seeded":
+                    report.alerts[key] = await refresh_alerts_for_seed(conn, PERSONAS[key].user_id, now)
     return report
 
 
-async def main(argv: list[str] | None = None) -> int:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     ap = argparse.ArgumentParser(description="Seed the StockPilot universe and demo personas")
     ap.add_argument("--reset", action="store_true", help="rebuild personas from scratch")
-    ap.add_argument("--personas", default="", help="comma separated subset of priya,alex,sam")
-    args = ap.parse_args(argv)
+    ap.add_argument(
+        "--personas",
+        default="",
+        help="comma separated subset of priya,alex,sam (default: all three; 'none' = no personas)",
+    )
+    ap.add_argument(
+        "--universe-only",
+        action="store_true",
+        help="production: tickers + simulated daily prices only, no demo personas, proposals or alerts",
+    )
+    return ap.parse_args(argv)
+
+
+def persona_keys(args: argparse.Namespace) -> list[str] | None:
+    """None = all personas; [] = none (`--universe-only`, `--personas none`). Contradictory flags are an error."""
+    names = [k.strip() for k in args.personas.split(",") if k.strip()]
+    wants_none = args.universe_only or [n.lower() for n in names] == ["none"]
+    if wants_none:
+        if args.universe_only and names and [n.lower() for n in names] != ["none"]:
+            raise SystemExit("--universe-only cannot be combined with --personas " + args.personas)
+        if args.reset:
+            raise SystemExit("--reset rebuilds personas; it cannot be combined with --universe-only / none")
+        return []
+    return names or None
+
+
+async def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
+    keys = persona_keys(args)
     settings = get_settings()
     conn = await asyncpg.connect(settings.database_admin_url)
     await init_connection(conn)
     try:
-        keys = [k.strip() for k in args.personas.split(",") if k.strip()] or None
         report = await seed(conn, reset=args.reset, personas=keys)
     finally:
         await conn.close()
     print(
         f"seed ok (prices through {report.as_of}, source={SEED_SOURCE}): {report.tickers} tickers, "
         f"{report.price_rows} price rows; personas: "
-        + ", ".join(f"{k}={v}" for k, v in report.personas.items())
+        + (", ".join(f"{k}={v}" for k, v in report.personas.items()) or "none (universe only)")
         + (
             "; proposals: " + ", ".join(f"{k}={v}" for k, v in report.proposals.items())
             if report.proposals
+            else ""
+        )
+        + (
+            "; alerts added by the engine: " + ", ".join(f"{k}={v}" for k, v in report.alerts.items())
+            if any(report.alerts.values())
             else ""
         )
     )

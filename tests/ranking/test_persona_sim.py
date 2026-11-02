@@ -12,6 +12,8 @@ from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from statistics import mean
 
+import pytest
+
 from app.modules.ranking import metrics
 from app.modules.ranking.bandit import cold_start_priors
 from app.modules.ranking.models import Arm, Candidate
@@ -156,3 +158,26 @@ def test_cold_start_priors_are_weak_and_tier_shaped() -> None:
     )  # weak: a handful of pseudo-counts
     assert cold_start_priors(None)["filing"] == Arm(2, 2)
     assert cold_start_priors(3, ["Income"])["brief"].mean > 0.5 - 1e-9
+
+
+# ----------------------------------------------------- CR-20 / T-PERS-TTP: time to personalization <= 30 events
+@pytest.mark.parametrize(
+    "seeds", [tuple(range(8)), tuple(range(100, 132))], ids=["eval-seeds", "held-out-seeds"]
+)
+def test_time_to_personalization_is_at_most_30_events_on_eval_and_held_out_seeds(
+    seeds: tuple[int, ...],
+) -> None:
+    """The ranker was tuned on `range(8)`; the held-out replications guard against overfitting that seed list."""
+    from evals.persona_sim import run_simulation
+
+    out = run_simulation(seeds=seeds)
+    assert out["ranker"] == "app.modules.ranking"
+    agg = out["aggregate"]
+    assert agg["time_to_personalization_events"] <= 30.0, agg
+    # faster learning must not cost quality, calibration or the guardrails
+    assert agg["ndcg5_personalised"] >= 0.93 and agg["ndcg5_lift"] >= 0.45 and agg["approve_rate_lift"] > 0
+    assert out["bot"]["critical_first_rate"] == 1.0 and out["bot"]["posterior_bounded"]
+    assert out["drift_flip_rate_within_20_events"] >= 0.8
+    for p in out["personas"]:
+        if p["id"] != "P6":
+            assert p["personalised"]["brier"] <= p["baseline"]["brier"], p["id"]

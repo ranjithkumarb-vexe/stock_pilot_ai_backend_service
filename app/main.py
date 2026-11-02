@@ -101,6 +101,14 @@ def create_app(settings: Settings | None = None, clock: Clock | None = None) -> 
         else None
     )
 
+    app.state.expensive_limiter = (
+        TokenBucketLimiter(
+            settings.rate_limit_expensive_burst, settings.rate_limit_expensive_per_s, monotonic
+        )
+        if settings.rate_limit_enabled
+        else None
+    )
+
     register_exception_handlers(app)
 
     # add_middleware: last added is outermost
@@ -110,6 +118,7 @@ def create_app(settings: Settings | None = None, clock: Clock | None = None) -> 
             IpRateLimitMiddleware,
             limiter=ip_limiter,
             trust_proxy=settings.trust_proxy,
+            trusted_hops=settings.trusted_proxy_hops,
         )
         app.state.ip_limiter = ip_limiter
     app.add_middleware(BodyLimitMiddleware, max_bytes=settings.max_body_bytes)

@@ -82,37 +82,46 @@ def to_brief_out(row: dict[str, Any]) -> BriefOut:
     )
 
 
+_ITEM_TITLES = {"1": "Business", "1A": "Risk Factors", "7": "Management's Discussion", "7A": "Market Risk"}
+
+
+async def _company_label(conn: Connection, symbol: str) -> str:
+    t = await conn.fetchrow("select name, cik from tickers where symbol = $1", symbol)
+    return f"{t['name']} (CIK {t['cik']})" if t and t["cik"] else (t["name"] if t else symbol)
+
+
+async def chunk_citation(conn: Connection, chunk_id: str, citation_id: str) -> CitationOut | None:
+    """Drawer payload for one filing chunk: reference data only (never user data); quarantined chunks are not served."""
+    ch = await conn.fetchrow(
+        "select k.symbol, k.text, k.item, k.form, k.accession_no, k.filed_at, d.url, d.fetched_at, d.sha256, d.title "
+        "from doc_chunks k join raw_documents d on d.id = k.document_id where k.id = $1::uuid and not k.quarantined",
+        chunk_id,
+    )
+    if ch is None:
+        return None
+    title = _ITEM_TITLES.get(ch["item"], ch["item"] or "Filing")
+    return CitationOut(
+        id=citation_id, kind="chunk", title=title, company=await _company_label(conn, ch["symbol"]),
+        doc_label=f"{ch['title'] or ch['form']} · Item {ch['item']}", accession_no=ch["accession_no"],
+        filed_at=ch["filed_at"].date().isoformat() if ch["filed_at"] else None,
+        fetched_at=now_iso(ch["fetched_at"]), sha256=ch["sha256"], url=ch["url"],
+        excerpt=ch["text"][:EXCERPT_CHARS], rows=[],
+    )  # fmt: skip
+
+
 async def citation_detail(conn: Connection, citation_id: UUID) -> CitationOut | None:
+    """Resolve a brief citation row (own user, RLS) or, failing that, a filing chunk uuid (chat citations)."""
     c = await conn.fetchrow(
         "select c.id, c.kind, c.ref_id, c.locator, b.ledger, b.symbol from citations c join briefs b on b.id = c.brief_id "
         "where c.id = $1",
         citation_id,
     )
     if c is None:
-        return None
+        return await chunk_citation(conn, str(citation_id), str(citation_id))
     t = await conn.fetchrow("select name, cik from tickers where symbol = $1", c["symbol"])
     company = f"{t['name']} (CIK {t['cik']})" if t and t["cik"] else (t["name"] if t else c["symbol"])
     if c["kind"] == "chunk":
-        ch = await conn.fetchrow(
-            "select k.text, k.item, k.form, k.period, k.accession_no, k.filed_at, d.url, d.fetched_at, d.sha256, d.title "
-            "from doc_chunks k join raw_documents d on d.id = k.document_id where k.id = $1::uuid",
-            c["ref_id"],
-        )
-        if ch is None:
-            return None
-        title = {
-            "1": "Business",
-            "1A": "Risk Factors",
-            "7": "Management's Discussion",
-            "7A": "Market Risk",
-        }.get(ch["item"], ch["item"] or "Filing")
-        return CitationOut(
-            id=str(c["id"]), kind="chunk", title=title, company=company,
-            doc_label=f"{ch['title'] or ch['form']} · Item {ch['item']}", accession_no=ch["accession_no"],
-            filed_at=ch["filed_at"].date().isoformat() if ch["filed_at"] else None,
-            fetched_at=now_iso(ch["fetched_at"]), sha256=ch["sha256"], url=ch["url"],
-            excerpt=ch["text"][:EXCERPT_CHARS], rows=[],
-        )  # fmt: skip
+        return await chunk_citation(conn, c["ref_id"], str(c["id"]))
     ids = [i for i in str(c["locator"]).removeprefix("ledger:").split(",") if i]
     ledger: dict[str, Any] = c["ledger"]
     entries = [(i, ledger[i]) for i in ids if i in ledger]

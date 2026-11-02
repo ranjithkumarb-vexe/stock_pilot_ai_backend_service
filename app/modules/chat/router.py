@@ -8,7 +8,7 @@ from uuid import UUID
 from fastapi import APIRouter, Query, Request
 
 from app.core.audit import write_audit
-from app.core.deps import ClockDep, CurrentUser, UserConn
+from app.core.deps import ClockDep, CurrentUser, ExpensiveCall, UserConn
 from app.core.logging import trace_id_var
 from app.core.pricesource import PriceSource
 from app.modules.chat import service, store
@@ -36,6 +36,7 @@ TITLES = {
     "/chat",
     response_model=ChatResponse,
     summary="Ask a question about your portfolio, rules or ingested filings",
+    dependencies=[ExpensiveCall],
 )
 async def post_chat(
     body: ChatRequest,

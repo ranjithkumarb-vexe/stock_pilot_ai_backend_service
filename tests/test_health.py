@@ -22,6 +22,7 @@ async def test_readyz_ok_with_real_db(app_client: httpx.AsyncClient) -> None:
 async def test_readyz_503_contract_error_without_db() -> None:
     settings = Settings(
         _env_file=None,
+        auth_mode="dev",
         database_url="postgresql://stockpilot_app:x@127.0.0.1:1/nope",
         database_admin_url="postgresql://x:x@127.0.0.1:1/nope",
     )

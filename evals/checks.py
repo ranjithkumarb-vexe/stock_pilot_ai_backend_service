@@ -235,6 +235,15 @@ async def injection(ctx: EvalContext) -> Measurement:
             missed.append(str(d["id"]))
     benign = load_jsonl("benign.jsonl")
     fps = [b["id"] for b in benign if process_plain_text(str(b["text"])).quarantined]
+    # real-world benign corpus: every ingested filing chunk (SEC-11: the multilingual / obfuscation-hardened scanner must
+    # not flag genuine 10-K / 8-K text). Chunks the pipeline quarantined count too: real filings carry no injections.
+    corpus_n = corpus_fps = 0
+    if ctx.db is not None:
+        corpus_scanner = HeuristicScanner()
+        async with ctx.system() as conn:
+            rows = await conn.fetch("select text from doc_chunks")
+        corpus_n = len(rows)
+        corpus_fps = sum(1 for r in rows if corpus_scanner.scan(str(r["text"])).flagged)
     traced = 0
     if ctx.db is not None:  # leave sample traces for the Audit screen (idempotent per document id)
         scanner = HeuristicScanner()
@@ -247,9 +256,19 @@ async def injection(ctx: EvalContext) -> Measurement:
             rec = await _eval_block_trace(str(d["id"]), scan)
             traced += int(rec)
     return Measurement(
-        {"blocked_rate": caught / len(docs), "benign_false_positives": float(len(fps))},
-        f"{caught} / {len(docs)} blocked, {len(fps)} benign flagged",
-        {"missed": missed, "false_positives": fps, "sample_traces_written": traced},
+        {
+            "blocked_rate": caught / len(docs),
+            "benign_false_positives": float(len(fps) + corpus_fps),
+        },
+        f"{caught} / {len(docs)} blocked, {len(fps)} benign flagged"
+        + (f", {corpus_fps} / {corpus_n} real filing chunks flagged" if corpus_n else ""),
+        {
+            "missed": missed,
+            "false_positives": fps,
+            "corpus_chunks_scanned": corpus_n,
+            "corpus_false_positives": corpus_fps,
+            "sample_traces_written": traced,
+        },
     )
 
 
@@ -711,7 +730,7 @@ STATIC_NOT_MEASURED: tuple[dict[str, Any], ...] = (
         "id": "T-PERF-01",
         "description": "Dashboard p95 < 1.5 s, brief p95 < 20 s (k6, 50 VUs)",
         "target": "< 1.5 s / < 20 s",
-        "reason": "load test is BE-22",
+        "reason": "not automated: scripts/load_smoke.py (50 VUs, dashboard) measured page-load p95 1.2-1.5 s on a dev laptop, borderline; brief generation p95 and a k6 run are not measured",
         "owner": "BE-22",
     },
     {

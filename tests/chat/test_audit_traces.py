@@ -131,6 +131,28 @@ async def test_quarantined_chunk_gets_a_system_trace_visible_to_every_user(
     assert (await tclient.get(f"/v1/audit/traces/{t['trace_id']}", headers=priya)).json()["id"] == t["id"]
 
 
+async def test_cr19_ingest_creates_the_quarantine_trace_immediately_without_backfill(
+    db_admin: Any, tclient: httpx.AsyncClient, company: str, tmp_path: Any
+) -> None:
+    from app.modules.edgar.ingest import TickerRef
+    from app.modules.research.ingest import ingest_ticker
+    from tests.research.test_ingest_retrieval import CIK, make_client, make_handler
+
+    await db_admin.execute("delete from raw_documents where symbol = $1", company)
+    await db_admin.execute("delete from traces where user_id is null and trace_id like 'quarantine:%'")
+    async with make_client(tmp_path, make_handler(inject_in="k26.htm")) as client:
+        await ingest_ticker(db_admin, client, TickerRef(company, CIK), n_10k=1, n_8k=0)
+    ids = [f"quarantine:{r['id']}" for r in await db_admin.fetch("select id from doc_chunks where quarantined and symbol = $1", company)]  # fmt: skip
+    assert ids
+    sql = "select count(*) from traces where user_id is null and outcome = 'blocked' and trace_id = any($1::text[])"
+    assert await db_admin.fetchval(sql, ids) == len(
+        ids
+    )  # the trace exists right after ingest (no backfill ran)
+    await backfill_quarantine_traces()
+    assert await db_admin.fetchval(sql, ids) == len(ids)  # idempotent: no duplicates
+    await db_admin.execute("delete from traces where user_id is null and trace_id like 'quarantine:%'")
+
+
 async def test_record_injection_block_hook(
     db_admin: Any, tclient: httpx.AsyncClient, priya: dict[str, str]
 ) -> None:

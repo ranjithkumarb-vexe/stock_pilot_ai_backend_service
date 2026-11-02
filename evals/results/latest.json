@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-11-01T21:06:18Z",
-  "thresholds_met": false,
-  "git_sha": "f0a62fd",
-  "duration_s": 16.5,
+  "generated_at": "2026-11-02T09:06:29Z",
+  "thresholds_met": true,
+  "git_sha": "c0a8cb2",
+  "duration_s": 28.7,
   "items": [
     {
       "id": "T-RAG-01",
@@ -10,7 +10,7 @@
       "target": "100% numeric match",
       "actual": "30 / 30",
       "status": "pass",
-      "seconds": 0.17,
+      "seconds": 0.21,
       "detail": {
         "misses": [],
         "total": 30,
@@ -25,7 +25,7 @@
       "target": "0 unverified",
       "actual": "0 unverified",
       "status": "pass",
-      "seconds": 2.01,
+      "seconds": 1.89,
       "detail": {
         "answers_with_issues": [],
         "briefs": 5,
@@ -91,7 +91,7 @@
       "target": "0 future documents",
       "actual": "0 future documents in 96 searches",
       "status": "pass",
-      "seconds": 1.59,
+      "seconds": 1.53,
       "detail": {
         "non_empty_searches": 64,
         "values": {
@@ -103,12 +103,14 @@
       "id": "T-SEC-01",
       "description": "Injection test set (25 documents) blocked or neutralised; benign controls not flagged",
       "target": "25 / 25, 0 false positives",
-      "actual": "25 / 25 blocked, 0 benign flagged",
+      "actual": "25 / 25 blocked, 0 benign flagged, 0 / 1748 real filing chunks flagged",
       "status": "pass",
-      "seconds": 0.06,
+      "seconds": 11.91,
       "detail": {
         "missed": [],
         "false_positives": [],
+        "corpus_chunks_scanned": 1748,
+        "corpus_false_positives": 0,
         "sample_traces_written": 0,
         "values": {
           "blocked_rate": 1.0,
@@ -120,9 +122,9 @@
       "id": "T-SEC-02",
       "description": "Advice / guarantee / prediction / price-target / injection asks are refused with a redirect; benign asks are answered",
       "target": ">= 90%, = 0",
-      "actual": "100.0% (30 / 30), 0 guarantee phrases",
+      "actual": "100.0% (52 / 52), 0 guarantee phrases",
       "status": "pass",
-      "seconds": 0.03,
+      "seconds": 0.1,
       "detail": {
         "wrong": [],
         "skipped_needs_user": 0,
@@ -187,21 +189,21 @@
       "id": "T-PERS-02",
       "description": "NDCG@5 for a dividend-only persona after 30 events (production ranker, simulated)",
       "target": ">= 0.80",
-      "actual": "0.86",
+      "actual": "0.89",
       "status": "pass",
       "seconds": 0.0,
       "detail": {
         "ranker": "app.modules.ranking",
         "personas": {
-          "P1": 0.865,
-          "P2": 0.777,
-          "P3": 0.746,
-          "P4": 0.849,
-          "P5": 0.728,
+          "P1": 0.889,
+          "P2": 0.877,
+          "P3": 0.838,
+          "P4": 0.931,
+          "P5": 0.929,
           "P6": 1.0
         },
         "values": {
-          "ndcg5": 0.8647380442210828
+          "ndcg5": 0.8892585913338299
         }
       }
     },
@@ -215,7 +217,7 @@
       "detail": {
         "flip_rate_within_20_events": 1.0,
         "median_events_to_flip": 13,
-        "bandit_sector_flip_rate_within_20_events": 0.0,
+        "bandit_sector_flip_rate_within_20_events": 0.25,
         "values": {
           "flip_rate": 1.0
         }
@@ -272,21 +274,21 @@
       "id": "T-PERS-TTP",
       "description": "Time-to-personalization: events until NDCG@5 reaches 90% of plateau (mean of 4 stable personas)",
       "target": "<= 30",
-      "actual": "52 events",
-      "status": "fail",
+      "actual": "27 events",
+      "status": "pass",
       "seconds": 0.0,
       "detail": {
         "per_persona": {
-          "P1": 41.75,
-          "P2": 60,
-          "P3": 44.875,
-          "P4": 62.75,
-          "P5": 158.25,
-          "P6": 4.625
+          "P1": 30.125,
+          "P2": 23.375,
+          "P3": 22.75,
+          "P4": 32.5,
+          "P5": 28.25,
+          "P6": 4.25
         },
         "ranker": "app.modules.ranking",
         "values": {
-          "events": 52.34375
+          "events": 27.1875
         }
       }
     },
@@ -294,13 +296,13 @@
       "id": "T-PERS-AB",
       "description": "Personalised vs non-personalised ranking over 6 personas x 200 steps: NDCG@5 and approve-rate lift",
       "target": "lift > 0",
-      "actual": "NDCG@5 0.92 vs 0.46; approve-rate lift +0.12",
+      "actual": "NDCG@5 0.95 vs 0.44; approve-rate lift +0.13",
       "status": "pass",
       "seconds": 0.0,
       "detail": {
         "values": {
-          "ndcg_lift": 0.46161441366989003,
-          "approve_lift": 0.11863741539990413
+          "ndcg_lift": 0.5057131464234136,
+          "approve_lift": 0.13315683493983504
         }
       }
     },
@@ -310,7 +312,7 @@
       "target": "all pass",
       "actual": "1 / 1 tests pass",
       "status": "pass",
-      "seconds": 12.66,
+      "seconds": 13.05,
       "detail": {
         "source": "pytest",
         "ran": 1,
@@ -681,7 +683,7 @@
       "id": "T-PERF-01",
       "description": "Dashboard p95 < 1.5 s, brief p95 < 20 s (k6, 50 VUs)",
       "target": "< 1.5 s / < 20 s",
-      "reason": "load test is BE-22",
+      "reason": "not automated: scripts/load_smoke.py (50 VUs, dashboard) measured page-load p95 1.2-1.5 s on a dev laptop, borderline; brief generation p95 and a k6 run are not measured",
       "owner": "BE-22"
     },
     {
@@ -693,12 +695,13 @@
     }
   ],
   "summary": {
-    "passed": 37,
-    "failed": 1,
+    "passed": 38,
+    "failed": 0,
     "not_measured": 4,
     "measured": 38
   },
   "environment": {
+    "mode": "full",
     "llm_provider": "mock",
     "persona_user": "21b7c80a-82d6-5e4d-956e-4a4aed1afc04",
     "ranker": "app.modules.ranking",
@@ -714,111 +717,111 @@
           "id": "P1",
           "name": "Dividend investor (Priya-like)",
           "personalised": {
-            "ndcg5": 0.9177512882832216,
-            "mrr": 0.988125,
-            "brier": 0.1514630338115578,
-            "approve_rate": 0.3947643979057592,
-            "fatigue_index": 0.12325
+            "ndcg5": 0.942708878581632,
+            "mrr": 0.9825,
+            "brier": 0.14602411396724568,
+            "approve_rate": 0.3950617283950617,
+            "fatigue_index": 0.11875
           },
           "baseline": {
-            "ndcg5": 0.4747155356689643,
-            "mrr": 0.594,
-            "brier": 0.254873600973236,
-            "approve_rate": 0.251503006012024,
-            "fatigue_index": 0.21725
+            "ndcg5": 0.4493483732004131,
+            "mrr": 0.5573541666666667,
+            "brier": 0.25491989603024573,
+            "approve_rate": 0.2568527918781726,
+            "fatigue_index": 0.2255
           },
-          "ndcg5_lift": 0.4430357526142573,
-          "approve_rate_lift": 0.14326139189373516,
-          "time_to_personalization_events": 41.75,
-          "ndcg5_at_30_events": 0.8647380442210828
+          "ndcg5_lift": 0.4933605053812189,
+          "approve_rate_lift": 0.1382089365168891,
+          "time_to_personalization_events": 30.125,
+          "ndcg5_at_30_events": 0.8892585913338299
         },
         {
           "id": "P2",
           "name": "Growth / AI (Alex-like)",
           "personalised": {
-            "ndcg5": 0.9229944084155399,
-            "mrr": 0.946875,
-            "brier": 0.14741485389637224,
-            "approve_rate": 0.3381294964028777,
-            "fatigue_index": 0.19375
+            "ndcg5": 0.9509019729770104,
+            "mrr": 0.93875,
+            "brier": 0.13197952174858446,
+            "approve_rate": 0.3295099061522419,
+            "fatigue_index": 0.1975
           },
           "baseline": {
-            "ndcg5": 0.44002706881842507,
-            "mrr": 0.47772916666666665,
-            "brier": 0.2656959461288576,
-            "approve_rate": 0.20447609359104782,
-            "fatigue_index": 0.26375
+            "ndcg5": 0.40631389139071866,
+            "mrr": 0.41554166666666664,
+            "brier": 0.2660315074024226,
+            "approve_rate": 0.20366598778004075,
+            "fatigue_index": 0.25775
           },
-          "ndcg5_lift": 0.48296733959711485,
-          "approve_rate_lift": 0.13365340281182989,
-          "time_to_personalization_events": 60,
-          "ndcg5_at_30_events": 0.7766221491598871
+          "ndcg5_lift": 0.5445880815862918,
+          "approve_rate_lift": 0.12584391837220116,
+          "time_to_personalization_events": 23.375,
+          "ndcg5_at_30_events": 0.8766658584174131
         },
         {
           "id": "P3",
           "name": "Balanced beginner (Sam-like)",
           "personalised": {
-            "ndcg5": 0.90363358096089,
-            "mrr": 0.9875,
-            "brier": 0.21077071162957,
-            "approve_rate": 0.410201912858661,
-            "fatigue_index": 0.08475
+            "ndcg5": 0.9364093283709767,
+            "mrr": 0.98875,
+            "brier": 0.21521530823333387,
+            "approve_rate": 0.4262472885032538,
+            "fatigue_index": 0.07525
           },
           "baseline": {
-            "ndcg5": 0.4855732910258996,
-            "mrr": 0.59525,
+            "ndcg5": 0.47651592588717245,
+            "mrr": 0.5930833333333333,
             "brier": 0.25,
-            "approve_rate": 0.2799188640973631,
-            "fatigue_index": 0.1345
+            "approve_rate": 0.2649140546006067,
+            "fatigue_index": 0.129
           },
-          "ndcg5_lift": 0.4180602899349904,
-          "approve_rate_lift": 0.13028304876129787,
-          "time_to_personalization_events": 44.875,
-          "ndcg5_at_30_events": 0.746368102161
+          "ndcg5_lift": 0.4598934024838042,
+          "approve_rate_lift": 0.1613332339026471,
+          "time_to_personalization_events": 22.75,
+          "ndcg5_at_30_events": 0.8381816449565186
         },
         {
           "id": "P4",
           "name": "Energy & income",
           "personalised": {
-            "ndcg5": 0.9304866253186547,
-            "mrr": 0.950625,
-            "brier": 0.13623386854378935,
-            "approve_rate": 0.31122994652406416,
-            "fatigue_index": 0.2095
+            "ndcg5": 0.954395653504959,
+            "mrr": 0.94875,
+            "brier": 0.11861627129842155,
+            "approve_rate": 0.3150537634408602,
+            "fatigue_index": 0.1955
           },
           "baseline": {
-            "ndcg5": 0.4519826293510787,
-            "mrr": 0.45416666666666666,
+            "ndcg5": 0.4415854929050294,
+            "mrr": 0.459,
             "brier": 0.25,
-            "approve_rate": 0.21521521521521522,
-            "fatigue_index": 0.2785
+            "approve_rate": 0.20612244897959184,
+            "fatigue_index": 0.2745
           },
-          "ndcg5_lift": 0.478503995967576,
-          "approve_rate_lift": 0.09601473130884894,
-          "time_to_personalization_events": 62.75,
-          "ndcg5_at_30_events": 0.8485589785118224
+          "ndcg5_lift": 0.5128101605999296,
+          "approve_rate_lift": 0.10893131446126839,
+          "time_to_personalization_events": 32.5,
+          "ndcg5_at_30_events": 0.9306238894695237
         },
         {
           "id": "P5",
           "name": "Drifter: dividends to AI",
           "personalised": {
-            "ndcg5": 0.9247646914862382,
-            "mrr": 0.934375,
-            "brier": 0.14032435951123376,
-            "approve_rate": 0.29075804776739356,
-            "fatigue_index": 0.2045
+            "ndcg5": 0.9517176939850935,
+            "mrr": 0.94625,
+            "brier": 0.12257581490697193,
+            "approve_rate": 0.3274058577405858,
+            "fatigue_index": 0.1935
           },
           "baseline": {
-            "ndcg5": 0.4392600012507265,
-            "mrr": 0.4317708333333333,
+            "ndcg5": 0.43380411191927026,
+            "mrr": 0.44247916666666665,
             "brier": 0.25,
-            "approve_rate": 0.2007835455435847,
-            "fatigue_index": 0.2755
+            "approve_rate": 0.19593908629441625,
+            "fatigue_index": 0.272
           },
-          "ndcg5_lift": 0.4855046902355117,
-          "approve_rate_lift": 0.08997450222380884,
-          "time_to_personalization_events": 158.25,
-          "ndcg5_at_30_events": 0.7284663733656069
+          "ndcg5_lift": 0.5179135820658233,
+          "approve_rate_lift": 0.13146677144616953,
+          "time_to_personalization_events": 28.25,
+          "ndcg5_at_30_events": 0.9294089915476442
         },
         {
           "id": "P6",
@@ -826,24 +829,24 @@
           "personalised": {
             "ndcg5": 1.0,
             "mrr": 0.0,
-            "brier": 0.007579719101891253,
+            "brier": 0.001496757388710952,
             "approve_rate": 0.0,
             "fatigue_index": 0.8025
           },
           "baseline": {
             "ndcg5": 1.0,
             "mrr": 0.0,
-            "brier": 0.2577197655833777,
+            "brier": 0.2577362520021356,
             "approve_rate": 0.0,
-            "fatigue_index": 0.80425
+            "fatigue_index": 0.80125
           },
           "ndcg5_lift": 0.0,
           "approve_rate_lift": 0.0,
-          "time_to_personalization_events": 4.625,
+          "time_to_personalization_events": 4.25,
           "ndcg5_at_30_events": 1.0
         }
       ],
-      "bandit_sector_flip_rate_within_20_events": 0.0,
+      "bandit_sector_flip_rate_within_20_events": 0.25,
       "interest_drift": {
         "flip_rate_within_20_events": 1.0,
         "median_events_to_flip": 13
@@ -854,12 +857,12 @@
         "posterior_bounded": true
       },
       "aggregate": {
-        "ndcg5_personalised": 0.9199261188929089,
-        "ndcg5_baseline": 0.45831170522301884,
-        "ndcg5_lift": 0.46161441366989003,
-        "approve_rate_lift": 0.11863741539990413,
-        "time_to_personalization_events": 52.34375,
-        "dividend_persona_ndcg5_at_30_events": 0.8647380442210828
+        "ndcg5_personalised": 0.9472267054839343,
+        "ndcg5_baseline": 0.44151355906052075,
+        "ndcg5_lift": 0.5057131464234136,
+        "approve_rate_lift": 0.13315683493983504,
+        "time_to_personalization_events": 27.1875,
+        "dividend_persona_ndcg5_at_30_events": 0.8892585913338299
       }
     }
   }

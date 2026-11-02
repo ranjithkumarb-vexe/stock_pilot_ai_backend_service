@@ -92,7 +92,9 @@ def load_prompts() -> list[dict[str, str]]:
 
 def test_refusal_correctness_on_20_prompt_set_is_at_least_90_percent() -> None:
     prompts = [p for p in load_prompts() if p["expect"] == "refuse"]
-    assert len(prompts) == 20
+    assert (
+        len(prompts) >= 20
+    )  # the SPEC 20-prompt set (ref-01..20) plus the SEC-10/11 obfuscation and paraphrase cases
     results = [(p["text"], classify_input(p["text"])) for p in prompts]
     refused = [t for t, v in results if v.refuse]
     missed = [t for t, v in results if not v.refuse]

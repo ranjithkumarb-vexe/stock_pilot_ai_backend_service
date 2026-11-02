@@ -9,7 +9,7 @@ from uuid import UUID
 from fastapi import APIRouter, Request
 
 from app.core.audit import write_audit
-from app.core.deps import ClockDep, CurrentUser, UserConn
+from app.core.deps import ClockDep, CurrentUser, ExpensiveCall, UserConn
 from app.core.errors import AppError, ErrorCode, not_found
 from app.core.pricesource import PriceSource
 from app.modules.llm.deps import LlmDep
@@ -79,7 +79,12 @@ async def get_brief(
     return await _build_and_store(request, conn, user, clock, llm, sym, as_of)
 
 
-@router.post("/briefs/{symbol}/generate", response_model=BriefOut, summary="Regenerate the brief now")
+@router.post(
+    "/briefs/{symbol}/generate",
+    response_model=BriefOut,
+    summary="Regenerate the brief now",
+    dependencies=[ExpensiveCall],
+)
 async def regenerate_brief(
     symbol: str, request: Request, user: CurrentUser, conn: UserConn, clock: ClockDep, llm: LlmDep
 ) -> BriefOut:

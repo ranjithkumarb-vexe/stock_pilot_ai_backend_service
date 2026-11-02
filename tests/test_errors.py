@@ -15,7 +15,7 @@ from app.main import create_app
 @pytest.fixture
 async def client() -> AsyncIterator[httpx.AsyncClient]:
     """App with a few throw-away routes; no database needed (they never touch it)."""
-    settings = Settings(_env_file=None, database_url="postgresql://x:x@127.0.0.1:1/nope")
+    settings = Settings(_env_file=None, auth_mode="dev", database_url="postgresql://x:x@127.0.0.1:1/nope")
     app: FastAPI = create_app(settings)
     probe = APIRouter()
 

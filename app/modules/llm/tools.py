@@ -3,6 +3,9 @@
 There is deliberately no tool that places an order: orders are created by the API after a user approves a
 proposal. `tests/safety/test_toolscan.py` scans this registry (T-SEC-07 / NFR-04). Modules that add tools call
 `register_tool()`; the scan test imports the registry after all modules are loaded.
+
+Identity is never a tool argument (SEC-20 / OWASP LLM06): tools act for the authenticated user bound server-side, so no
+schema here may expose a `user_id` (or similar) parameter that a model, or text it was steered by, could set to someone else.
 """
 
 from __future__ import annotations
@@ -45,9 +48,7 @@ register_tool(
 register_tool(
     "get_quotes", "Read latest quotes.", _obj({"tickers": {"type": "array", "items": _S}}, ["tickers"])
 )
-register_tool(
-    "get_portfolio", "Read the signed-in user's paper portfolio.", _obj({"user_id": _S}, ["user_id"])
-)
+register_tool("get_portfolio", "Read the signed-in user's paper portfolio.", _obj({}, []))
 register_tool(
     "evaluate_risk",
     "Run the deterministic risk engine on a portfolio against rules.",
@@ -60,6 +61,6 @@ register_tool(
 )
 register_tool(
     "get_user_profile",
-    "Read selected fields of the user's profile.",
-    _obj({"user_id": _S, "fields": {"type": "array", "items": _S}}, ["user_id"]),
+    "Read selected fields of the signed-in user's profile.",
+    _obj({"fields": {"type": "array", "items": _S}}, []),
 )
