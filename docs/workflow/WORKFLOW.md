@@ -17,6 +17,9 @@ Definitions are in `.claude/agents/*.md` (same in both repos). Each has a fixed 
 | `integration-engineer` | Keeps FE and BE contract-consistent; wires real API into UI; cross-repo E2E | `docs/contracts/*`, `src/api/*` (FE), `e2e/*` |
 | `qa-engineer` | Test strategy, regression/E2E/a11y/responsive/error scenarios, bug triage | `tests/*`, `e2e/*`, `docs/workflow/VERIFICATION.md` |
 | `security-reviewer` | Auth, RLS, injection, SSRF, secrets, OWASP LLM controls, dependency audit | read-only + findings in `docs/security/*` |
+| `data-integrations-engineer` | Scheduled data refresh and third-party data adapters built against fakes | `app/modules/marketdata/**` refresh jobs, `app/modules/edgar/jobs*`, `docs/VERIFIED.md` |
+| `reliability-engineer` | Load/perf tuning, caching, indexes, optional Sentry/metrics hooks, alert rules | `app/core/**` perf/observability, perf migrations (1100+), `scripts/load_smoke.py` |
+| `devops-engineer` | Deployment and provisioning, only with explicit owner approval per target | `infra/*`, platform configs, deploy evidence |
 | `release-manager` | Deploy config, env templates, runbook, release readiness report | `Dockerfile`, `infra/*`, `docs/RUNBOOK.md`, `docs/RELEASE.md` |
 
 ## 2. Lifecycle of one task
@@ -48,3 +51,6 @@ All of: every P0 task `done` or explicitly `deferred` with owner-visible reason;
 
 ## 7. Resuming
 Fresh session: `claude` in the repo, then say "resume the StockPilot workflow". The `orchestrator` agent reads STATUS → TASKS → HANDOFF, picks the next unblocked wave, and dispatches the other agents.
+
+## 8. Launch phase (added 2026-11-25)
+`docs/launch/LAUNCH_BLOCKERS.md` is the single list of what stops a beta rollout; each item is a `LB-nn` task in TASKS.md. Items marked **Owner** need credentials, accounts, spend or legal sign-off and are never executed by agents on their own; agents prepare them (env templates, runbook steps, dry runs) and report the exact action needed. Items marked **Agent** follow the normal task lifecycle (§2). Migration block for launch work: 1000–1099 data-integrations, 1100–1199 reliability. After the owner completes an owner-gated item, the `devops-engineer`/`qa-engineer` re-verify against the real service and record evidence; only then does `RELEASE.md` change status.

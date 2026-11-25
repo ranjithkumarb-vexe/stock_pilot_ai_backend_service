@@ -58,3 +58,20 @@ Frontend tasks (FE-*, INT-*) are in the web repo's `docs/workflow/TASKS.md`. Cro
 | QA-01 | P0 | Backend regression + error-scenario suite mapped to SPEC §12.4 ids | BE-* | Matrix in VERIFICATION.md: every scenario id → test → result | done (qa-engineer, 2026-11-02): `docs/qa/SCENARIO_MATRIX.md` maps all 45 scenarios (42 named in SPEC 12.4 + NFR-02/03/04) to exact tests and a fresh run: **39 covered-pass, 5 covered-partial, 1 not-measurable-here (T-PERF-01), 0 not-covered**. Partial: T-RAG-03 (citation support needs an LLM judge), T-RAG-04 (Ragas not run, deterministic proxy), T-DATA-04 (stored UTC + DST proven; 'displayed in user TZ' has no web test), T-PERS-03 (QA-D1), T-CHAOS-01 (QA-D2). New tests `tests/qa/` (13: 10 pass, 3 strict xfail). Defects found, NOT fixed (CRs in HANDOFF): QA-D1 drift prompt never served, QA-D2 outage replaces the cached good brief and degraded briefs are cached for the day, QA-D3 two secret-scan tests fail at HEAD against `tests/security/test_input_abuse.py:162` (full suite 1579 passed, 2 failed, 3 xfailed). Evidence in VERIFICATION.md |
 | SEC-01 | P0 | Security review (agent `security-reviewer`) | BE-* , FE-* | FINDINGS.md complete; criticals fixed | partial (2026-11-02, updated by BE-22): review of all 7 areas done, `docs/security/FINDINGS.md` saved; 0 critical, 0 high, 0 medium open; the 6 mediums and 8 of the lows are fixed with regression tests (`tests/security/` has no xfail left). Still open/accepted: SEC-01, 05, 16, 22 (+ info 09, 14, 19, 21). Not verified: real Supabase (aal claim shape, JWKS, OAuth), live Meta model (SEC-11/12 heuristics only), OWASP ZAP / Semgrep baselines, rate limiter behind a real proxy chain, browser CSP on a deployed site |
 | REL-01 | P0 | Release readiness report (`docs/RELEASE.md`) | all | Honest gate table; owner action list | done (release-manager, 2026-11-02): `docs/RELEASE.md` written (verdict NOT READY: backend suite red when `tests/security` runs before `tests/trading`, eval file overwritten by a `--fast` run; both small and listed), web pointer `docs/RELEASE.md` |
+
+## Launch phase (LB-*) — see docs/launch/LAUNCH_BLOCKERS.md for rationale and acceptance
+| ID | Owner type | Task | Status |
+|---|---|---|---|
+| LB-01..LB-10 | owner | PR merge, gh login, Supabase, Meta key, market-data keys, SEC contact, hosting, legal review, beta ops, secrets | blocked (owner) |
+| LB-11 | data-integrations | Daily prices refresh + scheduled XBRL/filings refresh jobs | todo |
+| LB-12 | data-integrations | Earnings calendar adapter (Finnhub) with estimate fallback | todo |
+| LB-13 | backend + web | QA-D1 interest-drift prompt end to end | todo |
+| LB-14 | reliability | Performance to p95 <= 1.0 s at 50 users; automate T-PERF-01 | todo |
+| LB-15 | frontend | Terms / Privacy / Disclaimer pages with placeholder text pending counsel | todo |
+| LB-16 | reliability + web | Optional Sentry + metrics, alert rules | todo |
+| LB-17 | frontend | react-router v7 upgrade (SEC-05) | todo |
+| LB-18 | qa | Firefox + WebKit E2E/deploy-smoke | todo |
+| LB-19 | security/devops | Dependabot, Semgrep, CodeQL | todo |
+| LB-20 | backend | SEC-01 admin-pool split (or accepted-risk ADR) | todo |
+| LB-21 | qa/frontend | T-DATA-04 TZ web test; deferrals recorded | todo |
+| LB-22 | release | Regenerate RELEASE.md after full re-verification | todo |

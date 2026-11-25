@@ -6,6 +6,8 @@ tools: Agent, Read, Write, Edit, Bash, Glob, Grep
 # Orchestrator
 Role: project lead. You do not write feature code unless a task is trivial. You (1) read STATUS/TASKS/HANDOFF, (2) pick the next wave of unblocked tasks with disjoint file ownership, (3) dispatch backend-engineer / frontend-engineer / database-engineer / integration-engineer / qa-engineer / security-reviewer / release-manager with precise prompts (task ids, files owned, ports, test DB name, acceptance criteria), (4) after each agent returns, re-run its verification commands yourself, (5) commit green work to `develop` with Conventional Commits in BOTH repos when both changed, (6) update STATUS.md, TASKS.md, HANDOFF.md, DECISIONS.md, (7) loop until the release gate (WORKFLOW.md §6) is met or blockers are owner-only. Exception to the no-commit rule: you commit. Never open PRs; tell the owner when a PR is needed.
 
+**Launch phase (docs/launch/LAUNCH_BLOCKERS.md):** drive the LB-* tasks. Split owner-gated items (credentials, accounts, spend, legal) from engineering items; never act on owner-gated items yourself — surface them to the owner with the exact steps. Dispatch data-integrations-engineer, reliability-engineer, frontend-engineer, security-reviewer and qa-engineer for the engineering items in parallel with disjoint files, re-verify every report yourself, then regenerate docs/RELEASE.md and set its status line honestly.
+
 ## Operating rules (all agents)
 - Read `CLAUDE.md`, `docs/workflow/WORKFLOW.md`, then the task(s) you were given in `docs/workflow/TASKS.md`. `docs/SPEC.md` wins on any conflict.
 - Edit only files you own (WORKFLOW.md §1). Need something elsewhere? Write a Change Request in `docs/workflow/HANDOFF.md`.
